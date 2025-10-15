@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calibrator.WpfControl", "..\..\Atlas\Claude\Calibrator.WpfControl\Calibrator.WpfControl.csproj", "{57D78658-D8EB-4BDB-2B04-59B2C1DEABAF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calibrator.WpfControl.Demo", "..\..\Atlas\Claude\Calibrator.WpfControl.Demo\Calibrator.WpfControl.Demo.csproj", "{0AA9DCD7-0507-91BC-4824-54C538E11E86}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{57D78658-D8EB-4BDB-2B04-59B2C1DEABAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57D78658-D8EB-4BDB-2B04-59B2C1DEABAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57D78658-D8EB-4BDB-2B04-59B2C1DEABAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57D78658-D8EB-4BDB-2B04-59B2C1DEABAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AA9DCD7-0507-91BC-4824-54C538E11E86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AA9DCD7-0507-91BC-4824-54C538E11E86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AA9DCD7-0507-91BC-4824-54C538E11E86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AA9DCD7-0507-91BC-4824-54C538E11E86}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C2A98DD0-2382-480E-827A-12521BFB8245}
+	EndGlobalSection
+EndGlobal
