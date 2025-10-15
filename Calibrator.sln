@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36518.9 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calibrator.WpfControl", "..\..\Atlas\Claude\Calibrator.WpfControl\Calibrator.WpfControl.csproj", "{57D78658-D8EB-4BDB-2B04-59B2C1DEABAF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calibrator.WpfControl", "Calibrator.WpfControl\Calibrator.WpfControl.csproj", "{56FE3E34-B810-C28E-C230-567E0D79F9F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calibrator.WpfControl.Demo", "..\..\Atlas\Claude\Calibrator.WpfControl.Demo\Calibrator.WpfControl.Demo.csproj", "{0AA9DCD7-0507-91BC-4824-54C538E11E86}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calibrator.WpfControl.Demo", "Calibrator.WpfControl.Demo\Calibrator.WpfControl.Demo.csproj", "{55C9EECC-5C6D-B71B-39C3-0B8EB903F39C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{57D78658-D8EB-4BDB-2B04-59B2C1DEABAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{57D78658-D8EB-4BDB-2B04-59B2C1DEABAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{57D78658-D8EB-4BDB-2B04-59B2C1DEABAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{57D78658-D8EB-4BDB-2B04-59B2C1DEABAF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0AA9DCD7-0507-91BC-4824-54C538E11E86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0AA9DCD7-0507-91BC-4824-54C538E11E86}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0AA9DCD7-0507-91BC-4824-54C538E11E86}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0AA9DCD7-0507-91BC-4824-54C538E11E86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56FE3E34-B810-C28E-C230-567E0D79F9F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56FE3E34-B810-C28E-C230-567E0D79F9F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56FE3E34-B810-C28E-C230-567E0D79F9F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56FE3E34-B810-C28E-C230-567E0D79F9F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55C9EECC-5C6D-B71B-39C3-0B8EB903F39C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55C9EECC-5C6D-B71B-39C3-0B8EB903F39C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55C9EECC-5C6D-B71B-39C3-0B8EB903F39C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55C9EECC-5C6D-B71B-39C3-0B8EB903F39C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

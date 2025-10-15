@@ -1,0 +1,16 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <!-- Base theme (colors, spacing, typography, effects) -->
+    <ResourceDictionary Source="/Calibrator.WpfControl;component/Themes/CalibratorTheme.xaml" />
+    <!-- Common helpers and templates -->
+    <ResourceDictionary Source="/Calibrator.WpfControl;component/Themes/Controls/CommonResources.xaml" />
+    <!-- Control style packs -->
+    <ResourceDictionary Source="/Calibrator.WpfControl;component/Themes/Controls/ScButtonStyles.xaml" />
+    <ResourceDictionary Source="/Calibrator.WpfControl;component/Themes/Controls/ScTextBoxStyles.xaml" />
+    <ResourceDictionary Source="/Calibrator.WpfControl;component/Themes/Controls/ScDropdownStyles.xaml" />
+    <ResourceDictionary Source="/Calibrator.WpfControl;component/Themes/Controls/UniTableStyles.xaml" />
+    <!-- Converters -->
+    <ResourceDictionary Source="/Calibrator.WpfControl;component/Converters/Converters.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+	<ItemGroup>
+		<!-- Core WPF packages for components -->
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="MahApps.Metro.IconPacks.Material" Version="6.1.0" />
+		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+		
+		<!-- Telerik packages - required for UniTable and some controls -->
+		<PackageReference Include="Telerik.Windows.Controls.Data.for.Wpf.Xaml" Version="2025.3.813" />
+		<PackageReference Include="Telerik.Windows.Controls.for.Wpf.Xaml" Version="2025.3.813" />
+		<PackageReference Include="Telerik.Windows.Controls.GridView.for.Wpf.Xaml" Version="2025.3.813" />
+		<PackageReference Include="Telerik.Windows.Controls.Input.for.Wpf.Xaml" Version="2025.3.813" />
+		<PackageReference Include="Telerik.Windows.Controls.Navigation.for.Wpf.Xaml" Version="2025.3.813" />
+		<PackageReference Include="Telerik.Windows.Data.for.Wpf.Xaml" Version="2025.3.813" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Resource Include="Resources\Fonts\SourceSansPro-Regular.otf" />
+	  <Resource Include="Resources\Images\atlas-copco-group-logo.ico" />
+	  <Resource Include="Resources\Images\atlas-copco-group-logo.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="Resources\Fonts\SourceSans3-VariableFont_wght.ttf">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+</Project>

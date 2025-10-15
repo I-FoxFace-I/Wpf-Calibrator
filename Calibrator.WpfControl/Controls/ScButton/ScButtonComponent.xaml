@@ -1,0 +1,66 @@
+<UserControl x:Class="Calibrator.WpfControl.Controls.ScButton.ScButtonComponent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             mc:Ignorable="d"
+             d:DesignHeight="30" d:DesignWidth="200">
+    
+    <UserControl.Resources>
+        <Style x:Key="TextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseScButtonTextBlockStyle}">
+            <Style.Triggers>
+                <DataTrigger
+                    Binding="{Binding UppercaseText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Value="True">
+                    <Setter Property="Typography.Capitals" Value="AllSmallCaps" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Button
+        FontSize="20"
+        Command="{Binding Command, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        MinWidth="{Binding ButtonWidth, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        Height="{Binding ButtonHeight, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center">
+        <Button.Style>
+            <Binding Path="ButtonType" 
+                     Converter="{StaticResource ScButtonTypeToStyleConverter}"
+                     RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+        </Button.Style>
+        
+        <StackPanel
+            Orientation="Horizontal"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+            <iconPacks:PackIconMaterial
+                Kind="{Binding IconKind, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Width="20"
+                Height="{Binding ButtonHeight, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Margin="0,0,5,0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+                <iconPacks:PackIconMaterial.Style>
+                    <Style TargetType="iconPacks:PackIconMaterial">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IconKind, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Static iconPacks:PackIconMaterialKind.None}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </iconPacks:PackIconMaterial.Style>
+            </iconPacks:PackIconMaterial>
+            <TextBlock
+                Text="{Binding Content, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Style="{StaticResource TextBlockStyle}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"/>
+        </StackPanel>
+    </Button>
+</UserControl>
+
+
