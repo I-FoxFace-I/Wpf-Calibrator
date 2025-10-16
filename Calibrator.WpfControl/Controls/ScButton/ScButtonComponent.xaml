@@ -6,7 +6,7 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d"
              d:DesignHeight="30" d:DesignWidth="200">
-    
+
     <UserControl.Resources>
         <Style x:Key="TextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseScButtonTextBlockStyle}">
             <Style.Triggers>
@@ -31,7 +31,7 @@
                      Converter="{StaticResource ScButtonTypeToStyleConverter}"
                      RelativeSource="{RelativeSource AncestorType=UserControl}"/>
         </Button.Style>
-        
+
         <StackPanel
             Orientation="Horizontal"
             HorizontalAlignment="Center"
@@ -62,5 +62,4 @@
         </StackPanel>
     </Button>
 </UserControl>
-
 

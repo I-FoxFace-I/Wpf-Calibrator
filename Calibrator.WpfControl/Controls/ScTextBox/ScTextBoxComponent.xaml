@@ -4,22 +4,51 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <Style TargetType="Label" x:Key="ScLabelWithValidationStyle" BasedOn="{StaticResource ScLabelStyle}">
+            <Setter Property="Foreground" Value="{StaticResource Calibrator.Brush.TextLabel}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="False">
+                    <Setter Property="Foreground" Value="{StaticResource Calibrator.Brush.Error}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <Label
-            Grid.Row="0"
-            Content="{Binding LabelText, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            Visibility="{Binding Path=IsLabelVisible, Converter={StaticResource BooleanToVisibility}, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            Margin="0 0 0 10"/>
 
+        <!-- Label s validacni ikonkou -->
+        <StackPanel Grid.Row="0" 
+                    Orientation="Horizontal"
+                    Visibility="{Binding Path=IsLabelVisible, Converter={StaticResource BooleanToVisibility}, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Margin="0 0 0 10">
+
+            <Label Style="{StaticResource ScLabelWithValidationStyle}"
+                   Content="{Binding LabelText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   Tag="{Binding IsValid, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   Margin="0"/>
+
+            <iconPacks:PackIconMaterial 
+                Kind="Alert"
+                Width="16"
+                Height="16"
+                Foreground="{StaticResource Calibrator.Brush.Error}"
+                VerticalAlignment="Center"
+                Margin="4,0,0,0"
+                Visibility="{Binding IsValid, Converter={StaticResource InverseBoolToVisibility}, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                ToolTip="{Binding ValidationError, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Cursor="Help"/>
+        </StackPanel>
+
+        <!-- TextBox -->
         <Border Grid.Row="1"
+                Style="{StaticResource ShadowedBorder}"
                 Width="{Binding TextBoxWidth, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 Height="{Binding TextBoxHeight, RelativeSource={RelativeSource AncestorType=UserControl}}">
             <telerik:RadWatermarkTextBox
@@ -34,11 +63,5 @@
                 VerticalContentAlignment="Center"
                 LostFocus="OnLostFocus"/>
         </Border>
-        
-        <!-- Validation Error Message -->
-        <TextBlock Grid.Row="2"
-                   Text="{Binding ValidationError, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                   Visibility="{Binding IsValid, Converter={StaticResource InverseBoolToVisibility}}"/>
-                                    <!--RelativeSource={RelativeSource AncestorType=UserControl},-->
     </Grid>
 </UserControl>

@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation"
-             xmlns:vm="clr-namespace:Calibrator.WpfControl.ViewModels"
+             xmlns:vm="clr-namespace:Calibrator.WpfControl.Abstract"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d"
              d:DesignHeight="80" d:DesignWidth="800">
@@ -53,7 +53,7 @@
                 <telerik:RadMenuItem Header="Processes"/>
                 <telerik:RadMenuItem Header="Settings" />
             </telerik:RadMenu>
-          
+
         </DockPanel>
     </Grid>
 </UserControl>

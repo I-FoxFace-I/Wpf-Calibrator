@@ -1,3 +1,5 @@
+namespace Calibrator.WpfControl.Controls.UniForm;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,65 +12,100 @@ using Calibrator.WpfControl.Controls.ScNumericUpDown;
 using Calibrator.WpfControl.Controls.ScTextBox;
 using Calibrator.WpfControl.Controls.UniForm.Models;
 
-namespace Calibrator.WpfControl.Controls.UniForm;
-
+/// <summary>
+/// A dynamic form container that generates form controls based on field definitions
+/// Supports grid layout with configurable columns and spacing.
+/// </summary>
 public partial class UniFormContainer : UserControl
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UniFormContainer"/> class.
+    /// </summary>
     public UniFormContainer()
     {
-        InitializeComponent();
+        this.InitializeComponent();
     }
 
+    /// <summary>
+    /// Gets or sets the collection of field definitions for the form.
+    /// </summary>
     public object Fields
     {
-        get => GetValue(FieldsProperty);
-        set => SetValue(FieldsProperty, value);
+        get => this.GetValue(FieldsProperty);
+        set => this.SetValue(FieldsProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets the data context for binding form fields.
+    /// </summary>
     public new object DataContext
     {
-        get => GetValue(DataContextProperty);
-        set => SetValue(DataContextProperty, value);
-    }
-    
-    public int Columns
-    {
-        get => (int)GetValue(ColumnsProperty);
-        set => SetValue(ColumnsProperty, value);
-    }
-    
-    public double HorizontalSpacing
-    {
-        get => (double)GetValue(HorizontalSpacingProperty);
-        set => SetValue(HorizontalSpacingProperty, value);
-    }
-    
-    public double VerticalSpacing
-    {
-        get => (double)GetValue(VerticalSpacingProperty);
-        set => SetValue(VerticalSpacingProperty, value);
+        get => this.GetValue(DataContextProperty);
+        set => this.SetValue(DataContextProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets the number of columns in the form layout.
+    /// </summary>
+    public int Columns
+    {
+        get => (int)this.GetValue(ColumnsProperty);
+        set => this.SetValue(ColumnsProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the horizontal spacing between form controls.
+    /// </summary>
+    public double HorizontalSpacing
+    {
+        get => (double)this.GetValue(HorizontalSpacingProperty);
+        set => this.SetValue(HorizontalSpacingProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the vertical spacing between form controls.
+    /// </summary>
+    public double VerticalSpacing
+    {
+        get => (double)this.GetValue(VerticalSpacingProperty);
+        set => this.SetValue(VerticalSpacingProperty, value);
+    }
+
+    /// <summary>
+    /// Identifies the Fields dependency property
+    /// </summary>
     public static readonly DependencyProperty FieldsProperty =
         DependencyProperty.Register(nameof(Fields), typeof(object),
             typeof(UniFormContainer),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                 OnFieldsChanged));
 
+    /// <summary>
+    /// Identifies the DataContext dependency property
+    /// </summary>
     public new static readonly DependencyProperty DataContextProperty =
         DependencyProperty.Register(nameof(DataContext), typeof(object),
             typeof(UniFormContainer),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                 OnDataContextChanged));
-    
+
+    /// <summary>
+    /// Identifies the Columns dependency property
+    /// </summary>
     public static readonly DependencyProperty ColumnsProperty =
         DependencyProperty.Register(nameof(Columns), typeof(int),
             typeof(UniFormContainer), new PropertyMetadata(2, OnLayoutChanged));
-    
+
+    /// <summary>
+    /// Identifies the HorizontalSpacing dependency property
+    /// </summary>
     public static readonly DependencyProperty HorizontalSpacingProperty =
         DependencyProperty.Register(nameof(HorizontalSpacing), typeof(double),
             typeof(UniFormContainer), new PropertyMetadata(16.0));
-    
+
+    /// <summary>
+    /// Identifies the VerticalSpacing dependency property
+    /// </summary>
     public static readonly DependencyProperty VerticalSpacingProperty =
         DependencyProperty.Register(nameof(VerticalSpacing), typeof(double),
             typeof(UniFormContainer), new PropertyMetadata(16.0));
@@ -95,7 +132,7 @@ public partial class UniFormContainer : UserControl
             uniForm.RegenerateForm(fields);
         }
     }
-    
+
     private static void OnLayoutChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not UniFormContainer uniForm)
@@ -109,18 +146,18 @@ public partial class UniFormContainer : UserControl
 
     private void RegenerateForm(IEnumerable<UniFormField> fields)
     {
-        FormContainer.Children.Clear();
-        FormContainer.RowDefinitions.Clear();
-        FormContainer.ColumnDefinitions.Clear();
+        this.FormContainer.Children.Clear();
+        this.FormContainer.RowDefinitions.Clear();
+        this.FormContainer.ColumnDefinitions.Clear();
 
         // Setup Grid columns
-        for (int i = 0; i < Columns; i++)
+        for (int i = 0; i < this.Columns; i++)
         {
-            FormContainer.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            this.FormContainer.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         }
 
         var orderedFields = fields
-            .Where(f => ShouldShowField(f))
+            .Where(f => this.ShouldShowField(f))
             .OrderBy(f => f.Order)
             .ToList();
 
@@ -130,12 +167,14 @@ public partial class UniFormContainer : UserControl
         foreach (var field in orderedFields)
         {
             if (field is not UniFormRegularField regularField)
+            {
                 continue;
+            }
 
             // Add row definition when needed
             if (currentCol == 0)
             {
-                FormContainer.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                this.FormContainer.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             }
 
             var fieldControl = CreateFieldControl(regularField);
@@ -146,18 +185,18 @@ public partial class UniFormContainer : UserControl
 
                 // Set margins for spacing (wrapping stackpanel behavior)
                 fieldControl.Margin = new Thickness(
-                    currentCol > 0 ? HorizontalSpacing / 2 : 0,
-                    currentRow > 0 ? VerticalSpacing : 0,
-                    currentCol < Columns - 1 ? HorizontalSpacing / 2 : 0,
+                    currentCol > 0 ? this.HorizontalSpacing / 2 : 0,
+                    currentRow > 0 ? this.VerticalSpacing : 0,
+                    currentCol < this.Columns - 1 ? this.HorizontalSpacing / 2 : 0,
                     0
                 );
 
-                FormContainer.Children.Add(fieldControl);
+                this.FormContainer.Children.Add(fieldControl);
             }
 
             // Move to next position
             currentCol++;
-            if (currentCol >= Columns)
+            if (currentCol >= this.Columns)
             {
                 currentCol = 0;
                 currentRow++;
@@ -168,15 +207,21 @@ public partial class UniFormContainer : UserControl
     private bool ShouldShowField(UniFormField field)
     {
         if (field is not UniFormRegularField regularField)
+        {
             return true;
+        }
 
         if (regularField.VisibilityCondition == null)
+        {
             return true;
+        }
 
-        if (DataContext == null)
+        if (this.DataContext == null)
+        {
             return true;
+        }
 
-        return regularField.VisibilityCondition(DataContext);
+        return regularField.VisibilityCondition(this.DataContext);
     }
 
     private FrameworkElement CreateFieldControl(UniFormRegularField field)
@@ -187,7 +232,7 @@ public partial class UniFormContainer : UserControl
             UniFormNumericField numericField => CreateScNumericUpDown(numericField),
             UniFormCheckBoxField checkBoxField => CreateScCheckBox(checkBoxField),
             UniFormComboBoxField comboBoxField => CreateScDropdown(comboBoxField),
-            _ => null
+            _ => null!
         };
     }
 
@@ -195,10 +240,10 @@ public partial class UniFormContainer : UserControl
     {
         var textBox = new ScTextBoxComponent
         {
-            LabelText = field.Label + (field.IsRequired ? " *" : ""),
+            LabelText = field.Label + (field.IsRequired ? " *" : string.Empty),
             Placeholder = field.Placeholder ?? string.Empty,
             TextBoxHeight = field.IsMultiline ? 100 : 50,
-            Validators = field.Validators
+            Validators = field.Validators ?? [],
         };
 
         if (!string.IsNullOrEmpty(field.ToolTip))
@@ -208,9 +253,9 @@ public partial class UniFormContainer : UserControl
 
         var binding = new Binding(field.GetPropertyName())
         {
-            Source = DataContext,
+            Source = this.DataContext,
             Mode = field.IsReadOnly ? BindingMode.OneWay : BindingMode.TwoWay,
-            UpdateSourceTrigger = UpdateSourceTrigger.LostFocus
+            UpdateSourceTrigger = UpdateSourceTrigger.LostFocus,
         };
 
         textBox.SetBinding(ScTextBoxComponent.TextBoxTextProperty, binding);
@@ -224,12 +269,12 @@ public partial class UniFormContainer : UserControl
     {
         var numeric = new ScNumericUpDownComponent
         {
-            LabelText = field.Label + (field.IsRequired ? " *" : ""),
+            LabelText = field.Label + (field.IsRequired ? " *" : string.Empty),
             Minimum = field.Minimum,
             Maximum = field.Maximum,
             Step = field.Step,
             ShowButtons = !field.IsReadOnly,
-            Validators = field.Validators
+            Validators = field.Validators ?? [],
         };
 
         if (!string.IsNullOrEmpty(field.ToolTip))
@@ -239,9 +284,9 @@ public partial class UniFormContainer : UserControl
 
         var binding = new Binding(field.GetPropertyName())
         {
-            Source = DataContext,
+            Source = this.DataContext,
             Mode = field.IsReadOnly ? BindingMode.OneWay : BindingMode.TwoWay,
-            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
         };
 
         numeric.SetBinding(ScNumericUpDownComponent.ValueProperty, binding);
@@ -249,14 +294,13 @@ public partial class UniFormContainer : UserControl
         return numeric;
     }
 
-    
     private ScCheckBoxComponent CreateScCheckBox(UniFormCheckBoxField field)
     {
         var checkBox = new ScCheckBoxComponent
         {
-            LabelText = field.Label + (field.IsRequired ? " *" : ""),
-            CheckBoxContent = string.Empty, // Content je už v labelu
-            IsEnabled = !field.IsReadOnly
+            LabelText = field.Label + (field.IsRequired ? " *" : string.Empty),
+            CheckBoxContent = string.Empty, // Content je uï¿½ v labelu
+            IsEnabled = !field.IsReadOnly,
         };
 
         if (!string.IsNullOrEmpty(field.ToolTip))
@@ -266,23 +310,24 @@ public partial class UniFormContainer : UserControl
 
         var binding = new Binding(field.GetPropertyName())
         {
-            Source = DataContext,
+            Source = this.DataContext,
             Mode = field.IsReadOnly ? BindingMode.OneWay : BindingMode.TwoWay,
-            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
         };
 
         checkBox.SetBinding(ScCheckBoxComponent.IsCheckedProperty, binding);
 
         return checkBox;
     }
+
     private ScDropdownComponent CreateScDropdown(UniFormComboBoxField field)
     {
         var dropdown = new ScDropdownComponent
         {
-            LabelText = field.Label + (field.IsRequired ? " *" : ""),
-            Items = field.ItemsSource,
+            LabelText = field.Label + (field.IsRequired ? " *" : string.Empty),
+            Items = field.ItemsSource ?? new object(),
             DisplayMemberPath = field.DisplayMemberPath ?? string.Empty,
-            IsEnabled = !field.IsReadOnly
+            IsEnabled = !field.IsReadOnly,
         };
 
         if (!string.IsNullOrEmpty(field.ToolTip))
@@ -294,7 +339,7 @@ public partial class UniFormContainer : UserControl
         {
             Source = DataContext,
             Mode = BindingMode.TwoWay,
-            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
         };
 
         dropdown.SetBinding(ScDropdownComponent.SelectedItemProperty, binding);

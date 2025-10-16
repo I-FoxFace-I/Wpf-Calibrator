@@ -6,20 +6,45 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <Style TargetType="Label" x:Key="ScLabelWithValidationStyle" BasedOn="{StaticResource ScLabelStyle}">
+            <Setter Property="Foreground" Value="{StaticResource Calibrator.Brush.TextLabel}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="False">
+                    <Setter Property="Foreground" Value="{StaticResource Calibrator.Brush.Error}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <Label
-            Grid.Row="0"
-            Style="{StaticResource ScTextBoxLabel}"
-            Content="{Binding LabelText, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            Visibility="{Binding Path=IsLabelVisible, Converter={StaticResource BooleanToVisibility}, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            Margin="0 0 0 10"/>
 
+        <StackPanel Grid.Row="0" 
+                    Orientation="Horizontal"
+                    Visibility="{Binding Path=IsLabelVisible, Converter={StaticResource BooleanToVisibility}, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Margin="0 0 0 10">
+
+            <Label Style="{StaticResource ScLabelWithValidationStyle}"
+                   Content="{Binding LabelText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   Tag="{Binding IsValid, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   Margin="0"/>
+
+            <iconPacks:PackIconMaterial 
+                Kind="Alert"
+                Width="16"
+                Height="16"
+                Foreground="{StaticResource Calibrator.Brush.Error}"
+                VerticalAlignment="Center"
+                Margin="4,0,0,0"
+                Visibility="{Binding IsValid, Converter={StaticResource InverseBoolToVisibility}, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                ToolTip="{Binding ValidationError, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Cursor="Help"/>
+        </StackPanel>
+
+        <!-- Numeric Input -->
         <Border Grid.Row="1"
                 Style="{StaticResource ShadowedBorder}"
                 Width="{Binding NumericWidth, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -29,64 +54,54 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                
+
+                <!-- TextBox for value input -->
                 <TextBox
-                    x:Name="NumericTextBox"
+                    x:Name="ValueTextBox"
                     Grid.Column="0"
+                    Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                     VerticalContentAlignment="Center"
                     HorizontalContentAlignment="Left"
                     Padding="{StaticResource Calibrator.Padding.Medium}"
-                    FontSize="{StaticResource Calibrator.FontSize.Medium}"
                     FontFamily="{StaticResource Calibrator.Font.Primary}"
+                    FontSize="{StaticResource Calibrator.FontSize.Medium}"
                     BorderThickness="0"
                     Background="Transparent"
-                    Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                    LostFocus="OnLostFocus"
-                    PreviewTextInput="OnPreviewTextInput"/>
-                
+                    PreviewTextInput="OnPreviewTextInput"
+                    LostFocus="OnLostFocus"/>
+
+                <!-- Up/Down buttons -->
                 <StackPanel Grid.Column="1" 
-                            Orientation="Vertical"
-                            VerticalAlignment="Center"
-                            Margin="0 0 5 0"
-                            Visibility="{Binding ShowButtons, RelativeSource={RelativeSource AncestorType=UserControl}, 
-                                                Converter={StaticResource BooleanToVisibility}}">
-                    <Button
-                        Width="20"
-                        Height="20"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
-                        Click="OnIncrementClick"
-                        Padding="0"
-                        Cursor="Hand">
+                           Orientation="Vertical"
+                           Visibility="{Binding ShowButtons, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibility}}">
+                    <Button Click="OnIncrementClick"
+                            Width="30"
+                            Height="25"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Padding="0"
+                            Cursor="Hand">
                         <iconPacks:PackIconMaterial 
                             Kind="ChevronUp"
                             Width="16"
                             Height="16"
-                            Foreground="{StaticResource Calibrator.Brush.PrimaryDark}"/>
+                            Foreground="{StaticResource Calibrator.Brush.TextSecondary}"/>
                     </Button>
-                    <Button
-                        Width="20"
-                        Height="20"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
-                        Click="OnDecrementClick"
-                        Padding="0"
-                        Cursor="Hand">
+                    <Button Click="OnDecrementClick"
+                            Width="30"
+                            Height="25"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Padding="0"
+                            Cursor="Hand">
                         <iconPacks:PackIconMaterial 
                             Kind="ChevronDown"
                             Width="16"
                             Height="16"
-                            Foreground="{StaticResource Calibrator.Brush.PrimaryDark}"/>
+                            Foreground="{StaticResource Calibrator.Brush.TextSecondary}"/>
                     </Button>
                 </StackPanel>
             </Grid>
         </Border>
-        
-        <!-- Validation Error Message -->
-        <TextBlock Grid.Row="2"
-                   Text="{Binding ValidationError, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                   Style="{StaticResource ScValidationErrorText}"
-                   Visibility="{Binding IsValid, RelativeSource={RelativeSource AncestorType=UserControl}, 
-                                        Converter={StaticResource InverseBoolToVisibility}}"/>
     </Grid>
 </UserControl>

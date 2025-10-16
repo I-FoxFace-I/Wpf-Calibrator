@@ -1,0 +1,45 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style x:Key="BaseScButtonTextBlockStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="{StaticResource Calibrator.FontSize.Large}"/>
+        <Setter Property="FontFamily" Value="{StaticResource Calibrator.Font.Primary}"/>
+    </Style>
+
+    <Style x:Key="ScRegularButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource Calibrator.Brush.Surface}"/>
+        <Setter Property="Foreground" Value="{StaticResource Calibrator.Brush.PrimaryDark}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Calibrator.Brush.Transparent}"/>
+        <Setter Property="BorderThickness" Value="{StaticResource Calibrator.BorderThickness.Thin}"/>
+        <Setter Property="Padding" Value="50 0 50 0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FontFamily" Value="{StaticResource Calibrator.Font.Primary}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource Calibrator.CornerRadius.Large}">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource ScRegularButton}">
+        <Setter Property="Background" Value="{StaticResource Calibrator.Brush.Primary}"/>
+        <Setter Property="Foreground" Value="{StaticResource Calibrator.Brush.Background}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Calibrator.Brush.TextPrimary}"/>
+        <Setter Property="BorderThickness" Value="{StaticResource Calibrator.BorderThickness.Thin}"/>
+    </Style>
+
+    <Style x:Key="TransparentButton" TargetType="Button" BasedOn="{StaticResource ScRegularButton}">
+        <Setter Property="Background" Value="{StaticResource Calibrator.Brush.Transparent}"/>
+        <Setter Property="Foreground" Value="{StaticResource Calibrator.Brush.TextPrimary}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Calibrator.Brush.TextPrimary}"/>
+        <Setter Property="BorderThickness" Value="{StaticResource Calibrator.BorderThickness.Thin}"/>
+    </Style>
+</ResourceDictionary>

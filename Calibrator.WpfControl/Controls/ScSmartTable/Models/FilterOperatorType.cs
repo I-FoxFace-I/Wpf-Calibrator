@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Telerik.Windows.Data;
 
@@ -10,19 +10,49 @@ namespace Calibrator.WpfControl.Controls.ScSmartTable.Models;
 /// </summary>
 public enum FilterOperatorType
 {
-    // Text operators (simplified to 3 most common)
-    Contains,           // Universal text search
-    IsEqualTo,          // Exact match
-    IsEmpty,            // Null/empty check
-    IsNotEmpty,         // Not null/empty check
+    /// <summary>
+    /// Universal text search - checks if text contains the specified value
+    /// </summary>
+    Contains,
 
-    // Numeric/Date operators (simplified to cover all cases with 3 operators)
-    Equals,             // Exact value match (=)
-    GreaterOrEqual,     // Greater than or equal (≥) 
-    LessOrEqual,        // Less than or equal (≤)
+    /// <summary>
+    /// Exact text match
+    /// </summary>
+    IsEqualTo,
 
-    // Boolean operators (minimal set)
+    /// <summary>
+    /// Checks if value is null or empty
+    /// </summary>
+    IsEmpty,
+
+    /// <summary>
+    /// Checks if value is not null or empty
+    /// </summary>
+    IsNotEmpty,
+
+    /// <summary>
+    /// Exact value match for numeric and date types
+    /// </summary>
+    Equals,
+
+    /// <summary>
+    /// Greater than or equal comparison (?)
+    /// </summary>
+    GreaterOrEqual,
+
+    /// <summary>
+    /// Less than or equal comparison (?)
+    /// </summary>
+    LessOrEqual,
+
+    /// <summary>
+    /// Checks if boolean value is true
+    /// </summary>
     IsTrue,
+
+    /// <summary>
+    /// Checks if boolean value is false
+    /// </summary>
     IsFalse
 }
 
@@ -34,7 +64,9 @@ public static class FilterOperatorHelper
     /// <summary>
     /// Get default filter operators based on property type (simplified)
     /// </summary>
-    public static List<FilterOperatorType> GetDefaultForType(Type propertyType)
+    /// <param name="propertyType">The type of the property to get operators for</param>
+    /// <returns>A collection of appropriate filter operators for the given type</returns>
+    public static ICollection<FilterOperatorType> GetDefaultForType(Type propertyType)
     {
         var underlyingType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
 
@@ -53,12 +85,12 @@ public static class FilterOperatorHelper
         if (IsNumericType(underlyingType) || underlyingType == typeof(DateTime))
         {
             // Unified numeric and date operators: 3 operators cover all cases
-            // Examples: x=5, x≥5, x≤5 can express: equals, greater, less, between (≥5 AND ≤10)
+            // Examples: x=5, x?5, x?5 can express: equals, greater, less, between (?5 AND ?10)
             return new List<FilterOperatorType>
             {
                 FilterOperatorType.Equals,          // Exact match (x = 5)
-                FilterOperatorType.GreaterOrEqual,  // Greater or equal (x ≥ 5)
-                FilterOperatorType.LessOrEqual      // Less or equal (x ≤ 5)
+                FilterOperatorType.GreaterOrEqual,  // Greater or equal (x ? 5)
+                FilterOperatorType.LessOrEqual      // Less or equal (x ? 5)
             };
         }
 
@@ -81,6 +113,8 @@ public static class FilterOperatorHelper
     /// <summary>
     /// Check if type is numeric
     /// </summary>
+    /// <param name="type">The type to check</param>
+    /// <returns>True if the type is a numeric type, false otherwise</returns>
     private static bool IsNumericType(Type type)
     {
         return type == typeof(int)
@@ -97,8 +131,10 @@ public static class FilterOperatorHelper
     }
 
     /// <summary>
-    /// Convert simplified FilterOperatorType to Telerik FilterOperator
+    /// Convert simplified FilterOperatorType to Telerik FilterOperator.
     /// </summary>
+    /// <param name="operatorType">The filter operator type to convert.</param>
+    /// <returns>The corresponding Telerik FilterOperator.</returns>
     public static FilterOperator ToTelerikOperator(FilterOperatorType operatorType)
     {
         return operatorType switch
@@ -108,23 +144,25 @@ public static class FilterOperatorHelper
             FilterOperatorType.IsEqualTo => FilterOperator.IsEqualTo,
             FilterOperatorType.IsEmpty => FilterOperator.IsEmpty,
             FilterOperatorType.IsNotEmpty => FilterOperator.IsNotEmpty,
-            
+
             // Numeric/Date operators (simplified)
             FilterOperatorType.Equals => FilterOperator.IsEqualTo,
             FilterOperatorType.GreaterOrEqual => FilterOperator.IsGreaterThanOrEqualTo,
             FilterOperatorType.LessOrEqual => FilterOperator.IsLessThanOrEqualTo,
-            
+
             // Boolean operators
             FilterOperatorType.IsTrue => FilterOperator.IsEqualTo,
             FilterOperatorType.IsFalse => FilterOperator.IsEqualTo,
-            
+
             _ => FilterOperator.IsEqualTo
         };
     }
 
     /// <summary>
-    /// Get display name for simplified filter operators
+    /// Get display name for simplified filter operators.
     /// </summary>
+    /// <param name="operatorType">The filter operator type to get display name for.</param>
+    /// <returns>A human-readable display name for the operator.</returns>
     public static string GetDisplayName(FilterOperatorType operatorType)
     {
         return operatorType switch
@@ -134,16 +172,16 @@ public static class FilterOperatorHelper
             FilterOperatorType.IsEqualTo => "Equals",
             FilterOperatorType.IsEmpty => "Is Empty",
             FilterOperatorType.IsNotEmpty => "Is Not Empty",
-            
+
             // Numeric/Date operators (with mathematical symbols for clarity)
             FilterOperatorType.Equals => "= (Equals)",
-            FilterOperatorType.GreaterOrEqual => "≥ (Greater or Equal)",
-            FilterOperatorType.LessOrEqual => "≤ (Less or Equal)",
-            
+            FilterOperatorType.GreaterOrEqual => "? (Greater or Equal)",
+            FilterOperatorType.LessOrEqual => "? (Less or Equal)",
+
             // Boolean operators
             FilterOperatorType.IsTrue => "Is True",
             FilterOperatorType.IsFalse => "Is False",
-            
+
             _ => operatorType.ToString()
         };
     }

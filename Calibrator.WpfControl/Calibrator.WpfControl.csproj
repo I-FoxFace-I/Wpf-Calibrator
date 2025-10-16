@@ -1,24 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<TargetFramework>net9.0-windows</TargetFramework>
-		<Nullable>enable</Nullable>
-		<UseWPF>true</UseWPF>
-		<ImplicitUsings>enable</ImplicitUsings>
+<PropertyGroup>
+		<!-- These properties is needed for dynamic generation of editorconfig from shared nuget package - Spirit.Common.EditorConfig -->
+		<SolutionDirectory>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)\..\..'))</SolutionDirectory>
+	<Nullable>enable</Nullable>
+	<UseWPF>true</UseWPF>
+	<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
+<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <NoWarn>1701;1702</NoWarn>
+  <WarningsNotAsErrors>SA1117</WarningsNotAsErrors>
+</PropertyGroup>
+<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <NoWarn>1701;1702</NoWarn>
+  <WarningsNotAsErrors>SA1117</WarningsNotAsErrors>
+</PropertyGroup>
+	
 	<ItemGroup>
 		<!-- Core WPF packages for components -->
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="MahApps.Metro.IconPacks.Material" Version="6.1.0" />
-		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
-		
+		<PackageReference Include="CommunityToolkit.Mvvm" />
+		<PackageReference Include="MahApps.Metro.IconPacks.Material" />
+		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" />
+
 		<!-- Telerik packages - required for UniTable and some controls -->
-		<PackageReference Include="Telerik.Windows.Controls.Data.for.Wpf.Xaml" Version="2025.3.813" />
-		<PackageReference Include="Telerik.Windows.Controls.for.Wpf.Xaml" Version="2025.3.813" />
-		<PackageReference Include="Telerik.Windows.Controls.GridView.for.Wpf.Xaml" Version="2025.3.813" />
-		<PackageReference Include="Telerik.Windows.Controls.Input.for.Wpf.Xaml" Version="2025.3.813" />
-		<PackageReference Include="Telerik.Windows.Controls.Navigation.for.Wpf.Xaml" Version="2025.3.813" />
-		<PackageReference Include="Telerik.Windows.Data.for.Wpf.Xaml" Version="2025.3.813" />
+		<PackageReference Include="Telerik.Windows.Controls.Data.for.Wpf.Xaml" />
+		<PackageReference Include="Telerik.Windows.Controls.for.Wpf.Xaml" />
+		<PackageReference Include="Telerik.Windows.Controls.GridView.for.Wpf.Xaml" />
+		<PackageReference Include="Telerik.Windows.Controls.Input.for.Wpf.Xaml" />
+		<PackageReference Include="Telerik.Windows.Controls.Navigation.for.Wpf.Xaml" />
+		<PackageReference Include="Telerik.Windows.Data.for.Wpf.Xaml" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Resource Include="Resources\Fonts\SourceSansPro-Regular.otf" />

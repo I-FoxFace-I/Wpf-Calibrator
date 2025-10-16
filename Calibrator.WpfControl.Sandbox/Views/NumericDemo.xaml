@@ -1,0 +1,78 @@
+<UserControl x:Class="Calibrator.WpfControl.Sandbox.Views.NumericDemo"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:scNumeric="clr-namespace:Calibrator.WpfControl.Controls.ScNumericUpDown;assembly=Calibrator.WpfControl">
+    <StackPanel>
+        <TextBlock Text="ScNumericUpDown Component" 
+                   FontSize="{StaticResource Calibrator.FontSize.XLarge}"
+                   FontWeight="Bold"
+                   Margin="0 0 0 20"/>
+
+        <TextBlock Text="Basic Numeric Input:" 
+                   FontSize="{StaticResource Calibrator.FontSize.Large}"
+                   Margin="0 0 0 10"/>
+        
+        <scNumeric:ScNumericUpDownComponent 
+            LabelText="Quantity"
+            Value="5"
+            NumericWidth="200"/>
+
+        <TextBlock Text="Numeric with Min/Max Range:" 
+                   FontSize="{StaticResource Calibrator.FontSize.Large}"
+                   Margin="0 30 0 10"/>
+        
+        <scNumeric:ScNumericUpDownComponent 
+            LabelText="Age"
+            Value="25"
+            Minimum="0"
+            Maximum="120"
+            NumericWidth="200"/>
+
+        <TextBlock Text="Numeric with Custom Step:" 
+                   FontSize="{StaticResource Calibrator.FontSize.Large}"
+                   Margin="0 30 0 10"/>
+        
+        <scNumeric:ScNumericUpDownComponent 
+            LabelText="Price"
+            Value="19.99"
+            Step="0.01"
+            Minimum="0"
+            NumericWidth="200"/>
+
+        <TextBlock Text="Numeric with Validation:" 
+                   FontSize="{StaticResource Calibrator.FontSize.Large}"
+                   Margin="0 30 0 10"/>
+        
+        <scNumeric:ScNumericUpDownComponent 
+            x:Name="ValidatedNumeric"
+            LabelText="Temperature (°C)"
+            Value="20"
+            Minimum="-50"
+            Maximum="50"
+            NumericWidth="200"/>
+
+        <TextBlock Text="Numeric without Buttons:" 
+                   FontSize="{StaticResource Calibrator.FontSize.Large}"
+                   Margin="0 30 0 10"/>
+        
+        <scNumeric:ScNumericUpDownComponent 
+            LabelText="Year"
+            Value="2025"
+            ShowButtons="False"
+            NumericWidth="200"/>
+
+        <Border Background="{StaticResource Calibrator.Brush.Surface}"
+                Padding="15"
+                CornerRadius="4"
+                Margin="0 30 0 0">
+            <StackPanel>
+                <TextBlock Text="Features:" FontWeight="Bold" Margin="0 0 0 10"/>
+                <TextBlock Text="• Up/Down buttons for easy increment/decrement" TextWrapping="Wrap"/>
+                <TextBlock Text="• Configurable min/max values" TextWrapping="Wrap"/>
+                <TextBlock Text="• Custom step size" TextWrapping="Wrap"/>
+                <TextBlock Text="• Validation support" TextWrapping="Wrap"/>
+                <TextBlock Text="• Can hide buttons for read-only mode" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

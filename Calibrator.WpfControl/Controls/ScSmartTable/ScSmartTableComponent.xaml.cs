@@ -1,4 +1,4 @@
-﻿using Calibrator.WpfControl.Controls.ScSmartTable.Models;
+using Calibrator.WpfControl.Controls.ScSmartTable.Models;
 using Calibrator.WpfControl.Controls.UniTable;
 using Calibrator.WpfControl.Resources;
 using CommunityToolkit.Mvvm.Input;
@@ -18,15 +18,24 @@ namespace Calibrator.WpfControl.Controls.ScSmartTable;
 /// <summary>
 /// Smart table with built-in Telerik filtering, sorting, and grouping capabilities
 /// Improved version with FilterRow mode and per-column filter configuration
-/// Supports both UniTableRegularColumn (standard) and SmartTableRegularColumn (enhanced) 
+/// Supports both UniTableRegularColumn (standard) and SmartTableRegularColumn (enhanced)
 /// SmartTableRegularColumn extends UniTableRegularColumn with additional filtering properties
 /// </summary>
 public partial class ScSmartTableComponent : UserControl
 {
     private const string TableOperationsColumnName = "Operations";
 
+    // Dictionary to store allowed filter operators per column
+    private readonly Dictionary<string, List<FilterOperator>> _columnFilterOperators = new();
+
+    /// <summary>
+    /// Gets the command for executing table actions
+    /// </summary>
     public AsyncRelayCommand<object> OnExecuteActionCommand { get; private set; }
 
+    /// <summary>
+    /// Initializes a new instance of the ScSmartTableComponent class
+    /// </summary>
     public ScSmartTableComponent()
     {
         InitializeComponent();
@@ -38,6 +47,7 @@ public partial class ScSmartTableComponent : UserControl
         // Subscribe to events
         GridView.Sorted += OnGridSorted;
         GridView.Filtered += OnGridFiltered;
+        GridView.FilterOperatorsLoading += OnFilterOperatorsLoading; // Handle filter operators
 
         // Apply initial settings
         ApplyFilteringMode();
@@ -45,126 +55,194 @@ public partial class ScSmartTableComponent : UserControl
 
     #region Dependency Properties
 
+    /// <summary>
+    /// Gets or sets the collection of column definitions for the table
+    /// </summary>
     public object Columns
     {
         get => GetValue(ColumnsProperty);
-        set => SetValue(ColumnsProperty, value);
+        set => this.SetValue(ColumnsProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets the data source for the table
+    /// </summary>
     public object ItemsSource
     {
         get => GetValue(ItemsSourceProperty);
-        set => SetValue(ItemsSourceProperty, value);
+        set => this.SetValue(ItemsSourceProperty, value);
     }
 
-    public List<UniTableBaseAction> TableOperations
+    /// <summary>
+    /// Gets or sets the collection of row actions available in the table
+    /// </summary>
+#pragma warning disable CA2227 // Collection properties should be read only
+    public ICollection<UniTableBaseAction> TableOperations
     {
-        get => (List<UniTableBaseAction>)GetValue(TableOperationsProperty);
-        set => SetValue(TableOperationsProperty, value);
+        get => (ICollection<UniTableBaseAction>)this.GetValue(TableOperationsProperty);
+        set => this.SetValue(TableOperationsProperty, value);
     }
+#pragma warning restore CA2227
 
+    /// <summary>
+    /// Gets or sets whether filtering is enabled for the table
+    /// </summary>
     public bool EnableFiltering
     {
-        get => (bool)GetValue(EnableFilteringProperty);
-        set => SetValue(EnableFilteringProperty, value);
+        get => (bool)this.GetValue(EnableFilteringProperty);
+        set => this.SetValue(EnableFilteringProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets whether sorting is enabled for the table
+    /// </summary>
     public bool EnableSorting
     {
-        get => (bool)GetValue(EnableSortingProperty);
-        set => SetValue(EnableSortingProperty, value);
+        get => (bool)this.GetValue(EnableSortingProperty);
+        set => this.SetValue(EnableSortingProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets whether grouping is enabled for the table
+    /// </summary>
     public bool EnableGrouping
     {
-        get => (bool)GetValue(EnableGroupingProperty);
-        set => SetValue(EnableGroupingProperty, value);
+        get => (bool)this.GetValue(EnableGroupingProperty);
+        set => this.SetValue(EnableGroupingProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets whether the search panel is visible
+    /// </summary>
     public bool ShowSearchPanel
     {
-        get => (bool)GetValue(ShowSearchPanelProperty);
-        set => SetValue(ShowSearchPanelProperty, value);
+        get => (bool)this.GetValue(ShowSearchPanelProperty);
+        set => this.SetValue(ShowSearchPanelProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets whether users can reorder columns
+    /// </summary>
     public bool EnableColumnReordering
     {
-        get => (bool)GetValue(EnableColumnReorderingProperty);
-        set => SetValue(EnableColumnReorderingProperty, value);
+        get => (bool)this.GetValue(EnableColumnReorderingProperty);
+        set => this.SetValue(EnableColumnReorderingProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets whether users can freeze columns
+    /// </summary>
     public bool EnableColumnFreezing
     {
-        get => (bool)GetValue(EnableColumnFreezingProperty);
-        set => SetValue(EnableColumnFreezingProperty, value);
+        get => (bool)this.GetValue(EnableColumnFreezingProperty);
+        set => this.SetValue(EnableColumnFreezingProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets whether column footers are visible
+    /// </summary>
     public bool ShowColumnFooters
     {
-        get => (bool)GetValue(ShowColumnFootersProperty);
-        set => SetValue(ShowColumnFootersProperty, value);
+        get => (bool)this.GetValue(ShowColumnFootersProperty);
+        set => this.SetValue(ShowColumnFootersProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets the filtering mode (Popup or FilterRow)
+    /// </summary>
     public Telerik.Windows.Controls.GridView.FilteringMode FilteringMode
     {
-        get => (Telerik.Windows.Controls.GridView.FilteringMode)GetValue(FilteringModeProperty);
-        set => SetValue(FilteringModeProperty, value);
+        get => (Telerik.Windows.Controls.GridView.FilteringMode)this.GetValue(FilteringModeProperty);
+        set => this.SetValue(FilteringModeProperty, value);
     }
 
+    /// <summary>
+    /// Identifies the Columns dependency property
+    /// </summary>
     public static readonly DependencyProperty ColumnsProperty =
         DependencyProperty.Register(nameof(Columns), typeof(object),
             typeof(ScSmartTableComponent),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                 OnColumnsChanged));
 
+    /// <summary>
+    /// Identifies the ItemsSource dependency property
+    /// </summary>
     public static readonly DependencyProperty ItemsSourceProperty =
         DependencyProperty.Register(nameof(ItemsSource), typeof(object),
             typeof(ScSmartTableComponent),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                 OnItemsSourceChanged));
 
+    /// <summary>
+    /// Identifies the TableOperations dependency property
+    /// </summary>
     public static readonly DependencyProperty TableOperationsProperty =
-        DependencyProperty.Register(nameof(TableOperations), typeof(List<UniTableBaseAction>),
+        DependencyProperty.Register(nameof(TableOperations), typeof(ICollection<UniTableBaseAction>),
             typeof(ScSmartTableComponent),
             new FrameworkPropertyMetadata(new List<UniTableBaseAction>(),
                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                 OnTableOperationsChange));
 
+    /// <summary>
+    /// Identifies the EnableFiltering dependency property
+    /// </summary>
     public static readonly DependencyProperty EnableFilteringProperty =
         DependencyProperty.Register(nameof(EnableFiltering), typeof(bool),
             typeof(ScSmartTableComponent),
             new FrameworkPropertyMetadata(true));
 
+    /// <summary>
+    /// Identifies the EnableSorting dependency property
+    /// </summary>
     public static readonly DependencyProperty EnableSortingProperty =
         DependencyProperty.Register(nameof(EnableSorting), typeof(bool),
             typeof(ScSmartTableComponent),
             new FrameworkPropertyMetadata(true));
 
+    /// <summary>
+    /// Identifies the EnableGrouping dependency property
+    /// </summary>
     public static readonly DependencyProperty EnableGroupingProperty =
         DependencyProperty.Register(nameof(EnableGrouping), typeof(bool),
             typeof(ScSmartTableComponent),
             new FrameworkPropertyMetadata(false));
 
+    /// <summary>
+    /// Identifies the ShowSearchPanel dependency property
+    /// </summary>
     public static readonly DependencyProperty ShowSearchPanelProperty =
         DependencyProperty.Register(nameof(ShowSearchPanel), typeof(bool),
             typeof(ScSmartTableComponent),
             new FrameworkPropertyMetadata(false));
 
+    /// <summary>
+    /// Identifies the EnableColumnReordering dependency property
+    /// </summary>
     public static readonly DependencyProperty EnableColumnReorderingProperty =
         DependencyProperty.Register(nameof(EnableColumnReordering), typeof(bool),
             typeof(ScSmartTableComponent),
             new FrameworkPropertyMetadata(true));
 
+    /// <summary>
+    /// Identifies the EnableColumnFreezing dependency property
+    /// </summary>
     public static readonly DependencyProperty EnableColumnFreezingProperty =
         DependencyProperty.Register(nameof(EnableColumnFreezing), typeof(bool),
             typeof(ScSmartTableComponent),
             new FrameworkPropertyMetadata(false));
 
+    /// <summary>
+    /// Identifies the ShowColumnFooters dependency property
+    /// </summary>
     public static readonly DependencyProperty ShowColumnFootersProperty =
         DependencyProperty.Register(nameof(ShowColumnFooters), typeof(bool),
             typeof(ScSmartTableComponent),
             new FrameworkPropertyMetadata(false));
 
+    /// <summary>
+    /// Identifies the FilteringMode dependency property
+    /// </summary>
     public static readonly DependencyProperty FilteringModeProperty =
         DependencyProperty.Register(nameof(FilteringMode), typeof(Telerik.Windows.Controls.GridView.FilteringMode),
             typeof(ScSmartTableComponent),
@@ -172,6 +250,9 @@ public partial class ScSmartTableComponent : UserControl
 
     #endregion
 
+    /// <summary>
+    /// Clears all active filters from the table
+    /// </summary>
     public void ClearFilters()
     {
         GridView.FilterDescriptors.Clear();
@@ -179,7 +260,7 @@ public partial class ScSmartTableComponent : UserControl
 
     #region Event Handlers
 
-    private async Task OnExecuteAction(object? parameter)
+    private static async Task OnExecuteAction(object? parameter)
     {
         var (baseAction, entity) =
             parameter as Tuple<UniTableBaseAction, object>
@@ -191,19 +272,54 @@ public partial class ScSmartTableComponent : UserControl
                 action.Command.Invoke(entity);
                 break;
             case UniTableAsyncAction asyncAction:
-                await asyncAction.Command(entity);
+                await asyncAction.Command(entity).ConfigureAwait(false);
                 break;
         }
     }
 
-    private void OnGridSorted(object sender, GridViewSortedEventArgs e)
+    private void OnGridSorted(object? sender, GridViewSortedEventArgs e)
     {
         // Event for external handling if needed
     }
 
-    private void OnGridFiltered(object sender, GridViewFilteredEventArgs e)
+    private void OnGridFiltered(object? sender, GridViewFilteredEventArgs e)
     {
         // Event for external handling if needed
+    }
+
+    /// <summary>
+    /// Handle FilterOperatorsLoading event to customize available filter operators per column
+    /// This is the recommended Telerik approach per: https://docs.telerik.com/devtools/wpf/controls/radgridview/filtering/how-to/howto-remove-some-of-the-available-filter-operators
+    /// Note: AvailableOperators is a RemoveOnlyCollection - we can only remove unwanted operators, not add new ones
+    /// </summary>
+    private void OnFilterOperatorsLoading(object? sender, FilterOperatorsLoadingEventArgs e)
+    {
+        // Get column unique name
+        var columnUniqueName = e.Column?.UniqueName;
+
+        if (string.IsNullOrEmpty(columnUniqueName))
+            return;
+
+        // If we have defined operators for this column, remove the ones we don't want
+        if (_columnFilterOperators.TryGetValue(columnUniqueName, out var allowedOperators))
+        {
+            // Create a list of operators to remove (those NOT in allowedOperators)
+            var operatorsToRemove = new List<FilterOperator>();
+
+            foreach (var availableOp in e.AvailableOperators)
+            {
+                if (!allowedOperators.Contains(availableOp))
+                {
+                    operatorsToRemove.Add(availableOp);
+                }
+            }
+
+            // Remove unwanted operators
+            foreach (var opToRemove in operatorsToRemove)
+            {
+                e.AvailableOperators.Remove(opToRemove);
+            }
+        }
     }
 
     #endregion
@@ -227,6 +343,7 @@ public partial class ScSmartTableComponent : UserControl
             return;
 
         smartTable.GridView.Columns.Clear();
+        smartTable._columnFilterOperators.Clear(); // Clear old operators
 
         foreach (var column in newColumns)
         {
@@ -239,7 +356,7 @@ public partial class ScSmartTableComponent : UserControl
 
                     if (smartColumn.IsFilterable && smartTable.EnableFiltering)
                     {
-                        ConfigureColumnFiltering(smartGridColumn, smartColumn);
+                        ConfigureColumnFiltering(smartGridColumn, smartColumn, smartTable);
                     }
 
                     smartTable.GridView.Columns.Add(smartGridColumn);
@@ -295,12 +412,15 @@ public partial class ScSmartTableComponent : UserControl
         gridColumn.IsGroupable = column.IsGroupable && smartTable.EnableGrouping;
     }
 
-    private static void ConfigureColumnFiltering(Telerik.Windows.Controls.GridViewColumn gridColumn, SmartTableRegularColumn column)
+    private static void ConfigureColumnFiltering(
+        Telerik.Windows.Controls.GridViewColumn gridColumn,
+        SmartTableRegularColumn column,
+        ScSmartTableComponent smartTable)
     {
         // Determine which filter operators to use
-        List<FilterOperatorType> allowedOperators;
+        ICollection<FilterOperatorType> allowedOperators;
 
-        if (column.AllowedFilterOperators != null && column.AllowedFilterOperators.Any())
+        if (column.AllowedFilterOperators != null && column.AllowedFilterOperators.Count > 0)
         {
             // Use explicitly defined operators
             allowedOperators = column.AllowedFilterOperators;
@@ -323,25 +443,15 @@ public partial class ScSmartTableComponent : UserControl
             }
         }
 
-        // Create column filter descriptor with available operators
-        if (distinctOperators.Any())
+        if (distinctOperators.Count > 0)
         {
-            // Set the first operator as default if not specified
+            // Store operators in dictionary for use in FilterOperatorsLoading event
+            smartTable._columnFilterOperators[gridColumn.UniqueName] = distinctOperators;
+
+            // Set default operator
             var defaultOperator = column.DefaultFilterOperator ?? allowedOperators.FirstOrDefault();
             var telerikDefaultOp = FilterOperatorHelper.ToTelerikOperator(defaultOperator);
-
-            // Note: Telerik's GridViewDataColumn uses ColumnFilterDescriptor internally
-            // We set the filter operators through the column's FilterMemberPath
-            // The actual filtering UI will show these operators
-
-            // Create a filter descriptor template
-            // new Telerik.Windows.Controls.GridView.ColumnFilterDescriptor(gridColumn)
-            //{
-            //    FilterOperator1 = telerikDefaultOp
-            //};
             gridColumn.ColumnFilterDescriptor.FieldFilter.Filter1.Operator = telerikDefaultOp;
-            // The available operators will be shown in the dropdown
-            // Telerik automatically provides the UI based on data type and these settings
         }
     }
 
@@ -361,16 +471,22 @@ public partial class ScSmartTableComponent : UserControl
 
     private void AssertTableOperationsColumn()
     {
-        if (!TableOperations.Any())
+        if (this.TableOperations.Count == 0)
+        {
             return;
+        }
 
-        if (GridView.Columns.Count == 0)
+        if (this.GridView.Columns.Count == 0)
+        {
             return;
+        }
 
-        var gridColumns = GridView.Columns.Cast<Telerik.Windows.Controls.GridViewColumn>().ToList();
+        var gridColumns = this.GridView.Columns.Cast<Telerik.Windows.Controls.GridViewColumn>().ToList();
 
         if (gridColumns.Any(a => a.UniqueName == TableOperationsColumnName))
+        {
             return;
+        }
 
         var operationsColumn = new GridViewDataColumn
         {
@@ -398,34 +514,36 @@ public partial class ScSmartTableComponent : UserControl
 
     private static GridViewDataColumn ToDataGridColumn(UniTableRegularColumn column, bool enableFiltering)
     {
+        var propertyName = column.GetPropertyName();
+
         var dataColumn = new GridViewDataColumn
         {
             Header = column.ColumnName,
-            DataMemberBinding = new Binding(column.GetPropertyName()),
+            DataMemberBinding = new Binding(propertyName),
             MinWidth = column.Width,
             IsReadOnly = column.IsReadOnly,
-            IsFilterable = enableFiltering
+            IsFilterable = enableFiltering,
+            FilterMemberPath = propertyName, // CRITICAL: Tells Telerik which property to use for filtering
+            UniqueName = propertyName
         };
-
-        // Set UniqueName for proper identification
-        dataColumn.UniqueName = column.GetPropertyName();
 
         return dataColumn;
     }
 
     private static GridViewCheckBoxColumn ToCheckBoxColumn(UniTableRegularColumn column)
     {
+        var propertyName = column.GetPropertyName();
+
         var checkBoxColumn = new GridViewCheckBoxColumn
         {
             Header = column.ColumnName,
-            DataMemberBinding = new Binding(column.GetPropertyName()),
+            DataMemberBinding = new Binding(propertyName),
             MinWidth = column.Width,
             IsReadOnly = column.IsReadOnly,
-            CellStyle = (Style)Application.Current.Resources[ResourceKeys.GridViewCellStyle]
+            CellStyle = (Style)Application.Current.Resources[ResourceKeys.GridViewCellStyle],
+            FilterMemberPath = propertyName, // CRITICAL: Tells Telerik which property to use for filtering
+            UniqueName = propertyName
         };
-
-        // Set UniqueName for proper identification
-        checkBoxColumn.UniqueName = column.GetPropertyName();
 
         return checkBoxColumn;
     }

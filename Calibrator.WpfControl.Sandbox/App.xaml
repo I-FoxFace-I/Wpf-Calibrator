@@ -1,0 +1,15 @@
+<Application x:Class="Calibrator.WpfControl.Sandbox.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <!-- Base Calibrator resources (no Telerik dependency) -->
+        <ResourceDictionary Source="/Calibrator.WpfControl;component/Resources/Calibrator.All.xaml" />
+        <!-- Telerik-dependent resources (requires Telerik UI for WPF assemblies) -->
+        <ResourceDictionary Source="/Calibrator.WpfControl;component/Resources/Calibrator.All.Telerik.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+</Application>

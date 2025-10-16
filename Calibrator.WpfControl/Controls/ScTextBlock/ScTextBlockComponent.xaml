@@ -14,10 +14,9 @@
 
         <Label
             Grid.Row="0"
-            Style="{StaticResource ScTextBoxLabel}"
+            Style="{StaticResource ScLabelStyle}"
             Content="{Binding LabelText, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            Visibility="{Binding Path=IsLabelVisible, Converter={StaticResource BooleanToVisibility}, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            Margin="0 0 0 10"/>
+            Visibility="{Binding Path=IsLabelVisible, Converter={StaticResource BooleanToVisibility}, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
 
         <Border Grid.Row="1"
                 Style="{StaticResource ShadowedBorder}"

@@ -62,31 +62,35 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <StackPanel Orientation="Horizontal">
 
-        <!-- Label -->
-        <Label
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Label -->
+            <Label
             Grid.Row="0"
-            Style="{StaticResource ScTextBoxLabel}"
+            Style="{StaticResource ScLabelStyle}"
             Content="{Binding LabelText, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            Visibility="{Binding Path=IsLabelVisible, Converter={StaticResource BooleanToVisibility}, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            Margin="0 0 0 10"/>
+            Visibility="{Binding Path=IsLabelVisible, Converter={StaticResource BooleanToVisibility}, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
 
-        <!-- CheckBox -->
-        <CheckBox
-            x:Name="InnerCheckBox"
-            Grid.Row="1"
-            HorizontalAlignment="Center"
-            Style="{StaticResource CustomCheckBoxStyle}"
-            Content="{Binding CheckBoxContent, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            IsChecked="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
-            IsEnabled="{Binding IsEnabled, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            FontSize="{StaticResource Calibrator.FontSize.Medium}"
-            FontFamily="{StaticResource Calibrator.Font.Primary}"
-            Foreground="{StaticResource Calibrator.Brush.TextPrimary}"/>
-    </Grid>
+            <!-- CheckBox Container -->
+
+            <CheckBox
+                Grid.Row="1"
+                x:Name="InnerCheckBox"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Style="{StaticResource CustomCheckBoxStyle}"
+                Content="{Binding CheckBoxContent, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                IsChecked="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                IsEnabled="{Binding IsEnabled, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                FontSize="{StaticResource Calibrator.FontSize.Medium}"
+                FontFamily="{StaticResource Calibrator.Font.Primary}"
+                Foreground="{StaticResource Calibrator.Brush.TextPrimary}"/>
+        </Grid>
+    </StackPanel>
 </UserControl>

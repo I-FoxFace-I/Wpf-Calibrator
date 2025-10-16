@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <OutputType>WinExe</OutputType>
+	  <UseWPF>true</UseWPF>
+		<!-- These properties is needed for dynamic generation of editorconfig from shared nuget package - Spirit.Common.EditorConfig -->
+		<SolutionDirectory>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)\..\..'))</SolutionDirectory>
+		
+		<!-- Demo project - disable strict code analysis -->
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+		<CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
+		<EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+		<GenerateDocumentationFile>false</GenerateDocumentationFile>
+		<AnalysisLevel>none</AnalysisLevel>
+		<AnalysisMode>none</AnalysisMode>
+		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+	</PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Calibrator.WpfControl\Calibrator.WpfControl.csproj" />
+	  
+  </ItemGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="Telerik.Windows.Controls.Charting.for.Wpf.Xaml" />
+	  <PackageReference Include="Telerik.Windows.Controls.Data.for.Wpf.Xaml" />
+	  <PackageReference Include="Telerik.Windows.Controls.for.Wpf.Xaml" />
+	  <PackageReference Include="Telerik.Windows.Controls.GridView.for.Wpf.Xaml" />
+	  <PackageReference Include="Telerik.Windows.Controls.ImageEditor.for.Wpf.Xaml" />
+	  <PackageReference Include="Telerik.Windows.Controls.Input.for.Wpf.Xaml" />
+	  <PackageReference Include="Telerik.Windows.Controls.Navigation.for.Wpf.Xaml" />
+	  <PackageReference Include="Telerik.Windows.Controls.VirtualGrid.for.Wpf.Xaml" />
+	  <PackageReference Include="Telerik.Windows.Data.for.Wpf.Xaml" />
+	  <PackageReference Include="MahApps.Metro.IconPacks.Material" />
+  </ItemGroup>
+
+  <!-- Explicitly remove global analyzers for demo project -->
+  <ItemGroup>
+    <GlobalPackageReference Remove="SonarAnalyzer.CSharp" />
+  </ItemGroup>
+
+</Project>

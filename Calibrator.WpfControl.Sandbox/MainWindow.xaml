@@ -1,0 +1,92 @@
+<Window x:Class="Calibrator.WpfControl.Sandbox.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:scButton="clr-namespace:Calibrator.WpfControl.Controls.ScButton;assembly=Calibrator.WpfControl"
+        mc:Ignorable="d"
+        Title="Calibrator WPF Controls Demo" Height="700" Width="1200">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Navigation Menu -->
+        <Border Grid.Column="0" 
+                Background="{StaticResource Calibrator.Brush.Surface}"
+                Padding="{StaticResource Calibrator.Padding.Medium}">
+            <StackPanel>
+                <TextBlock Text="Components" 
+                           FontSize="{StaticResource Calibrator.FontSize.Large}"
+                           FontWeight="Bold"
+                           Foreground="{StaticResource Calibrator.Brush.PrimaryDark}"
+                           Margin="0 0 0 20"/>
+
+                <scButton:ScButtonComponent Content="ScButton" 
+                                            UppercaseText="False"
+                                           ButtonType="Transparent"
+                                           Command="{Binding ShowButtonsDemoCommand}"
+                                           Margin="0 0 0 20"/>
+
+                <scButton:ScButtonComponent Content="ScTextBox" 
+                                            UppercaseText="False"
+                                           ButtonType="Transparent"
+                                           Command="{Binding ShowTextBoxDemoCommand}"
+                                           Margin="0 0 0 20"/>
+
+                <scButton:ScButtonComponent Content="ScTextBlock" 
+                                            UppercaseText="False"
+                                           ButtonType="Transparent"
+                                           Command="{Binding ShowTextBlockDemoCommand}"
+                                           Margin="0 0 0 20"/>
+
+                <scButton:ScButtonComponent Content="ScNumeric" 
+                                            UppercaseText="False"
+                                           ButtonType="Transparent"
+                                           Command="{Binding ShowNumericDemoCommand}"
+                                           Margin="0 0 0 20"/>
+
+                <scButton:ScButtonComponent Content="ScDropdown" 
+                                            UppercaseText="False"
+                                           ButtonType="Transparent"
+                                           Command="{Binding ShowDropdownDemoCommand}"
+                                           Margin="0 0 0 20"/>
+
+                
+
+                <scButton:ScButtonComponent Content="ScSmartTable" 
+                                            UppercaseText="False"
+                                           ButtonType="Transparent"
+                                           Command="{Binding ShowSmartTableDemoCommand}"
+                                           Margin="0 0 0 20"/>
+
+                
+
+                <scButton:ScButtonComponent Content="ScSmartContainer" 
+                                            UppercaseText="False"
+                                           ButtonType="Transparent"
+                                           Command="{Binding ShowSmartContainerDemoCommand}"
+                                           Margin="0 0 0 40"/>
+
+                <scButton:ScButtonComponent Content="UniTable" 
+                            UppercaseText="False"
+                           ButtonType="Transparent"
+                           Command="{Binding ShowUniTableDemoCommand}"
+                           Margin="0 0 0 10"/>
+                <scButton:ScButtonComponent Content="UniForm" 
+                                            UppercaseText="False"
+                                           ButtonType="Transparent"
+                                           Command="{Binding ShowUniFormDemoCommand}"
+                                           Margin="0 0 0 20"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Content Area -->
+        <ScrollViewer Grid.Column="1" 
+                      VerticalScrollBarVisibility="Auto"
+                      Padding="{StaticResource Calibrator.Padding.Large}">
+            <ContentControl x:Name="ContentArea"/>
+        </ScrollViewer>
+    </Grid>
+</Window>

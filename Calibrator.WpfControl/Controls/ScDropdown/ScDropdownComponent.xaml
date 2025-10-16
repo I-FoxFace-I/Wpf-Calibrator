@@ -13,10 +13,9 @@
         </Grid.RowDefinitions>
         <Label
             Grid.Row="0"
+            Style="{StaticResource ScLabelStyle}"
             Content="{Binding LabelText, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            Visibility="{Binding Path=IsLabelVisible, Converter={StaticResource BooleanToVisibility}, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            FontSize="14"
-            Margin="0 0 0 10">
+            Visibility="{Binding Path=IsLabelVisible, Converter={StaticResource BooleanToVisibility}, RelativeSource={RelativeSource AncestorType=UserControl}}">
         </Label>
 
         <Border Grid.Row="1"
@@ -37,5 +36,3 @@
         </Border>
     </Grid>
 </UserControl>
-
-

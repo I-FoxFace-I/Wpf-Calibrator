@@ -1,0 +1,57 @@
+<UserControl x:Class="Calibrator.WpfControl.Sandbox.Views.DropdownDemo"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:scDropdown="clr-namespace:Calibrator.WpfControl.Controls.ScDropdown;assembly=Calibrator.WpfControl">
+    <StackPanel>
+        <TextBlock Text="ScDropdown Component" 
+                   FontSize="{StaticResource Calibrator.FontSize.XLarge}"
+                   FontWeight="Bold"
+                   Margin="0 0 0 20"/>
+
+        <TextBlock Text="Simple String Dropdown:" 
+                   FontSize="{StaticResource Calibrator.FontSize.Large}"
+                   Margin="0 0 0 10"/>
+        
+        <scDropdown:ScDropdownComponent 
+            LabelText="Select Country"
+            Items="{Binding Countries}"
+            SelectedItem="{Binding SelectedCountry}"
+            DropdownWidth="300"/>
+
+        <TextBlock Text="Object Dropdown with DisplayMemberPath:" 
+                   FontSize="{StaticResource Calibrator.FontSize.Large}"
+                   Margin="0 30 0 10"/>
+        
+        <scDropdown:ScDropdownComponent 
+            LabelText="Select City"
+            Items="{Binding Cities}"
+            SelectedItem="{Binding SelectedCity}"
+            DisplayMemberPath="Name"
+            DropdownWidth="300"/>
+
+        <TextBlock Text="Disabled Dropdown:" 
+                   FontSize="{StaticResource Calibrator.FontSize.Large}"
+                   Margin="0 30 0 10"/>
+        
+        <scDropdown:ScDropdownComponent 
+            LabelText="Status"
+            Items="{Binding Statuses}"
+            SelectedItem="{Binding SelectedStatus}"
+            IsEnabled="False"
+            DropdownWidth="300"/>
+
+        <TextBlock Text="Selected Values:" 
+                   FontSize="{StaticResource Calibrator.FontSize.Large}"
+                   Margin="0 30 0 10"/>
+        
+        <Border Background="{StaticResource Calibrator.Brush.Surface}"
+                Padding="15"
+                CornerRadius="4">
+            <StackPanel>
+                <TextBlock Text="{Binding SelectedCountry, StringFormat='Country: {0}'}" Margin="0 0 0 5"/>
+                <TextBlock Text="{Binding SelectedCity.Name, StringFormat='City: {0}'}" Margin="0 0 0 5"/>
+                <TextBlock Text="{Binding SelectedStatus, StringFormat='Status: {0}'}"/>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

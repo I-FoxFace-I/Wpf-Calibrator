@@ -6,21 +6,28 @@ namespace Calibrator.WpfControl.Controls.UniTable.Models;
 public class UniTableSort
 {
     /// <summary>
-    /// Name of the column to sort
+    /// Gets or sets the name of the column to sort
     /// </summary>
-    public string ColumnName { get; set; }
-    
+    public required string ColumnName { get; set; }
+
     /// <summary>
-    /// Sort direction
+    /// Gets or sets the sort direction
     /// </summary>
     public SortDirection Direction { get; set; } = SortDirection.Ascending;
 }
 
 /// <summary>
-/// Sort direction
+/// Defines the sort direction for table columns
 /// </summary>
 public enum SortDirection
 {
+    /// <summary>
+    /// Sort in ascending order (A-Z, 0-9)
+    /// </summary>
     Ascending,
+
+    /// <summary>
+    /// Sort in descending order (Z-A, 9-0)
+    /// </summary>
     Descending
 }

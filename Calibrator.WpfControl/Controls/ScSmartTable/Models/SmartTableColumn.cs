@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Calibrator.WpfControl.Controls.UniTable;
@@ -12,43 +12,43 @@ namespace Calibrator.WpfControl.Controls.ScSmartTable.Models;
 public abstract class SmartTableRegularColumn : UniTableRegularColumn
 {
     /// <summary>
-    /// Enable filtering for this column
+    /// Gets whether filtering is enabled for this column
     /// </summary>
     public bool IsFilterable { get; init; } = true;
 
     /// <summary>
-    /// Enable sorting for this column
+    /// Gets whether sorting is enabled for this column
     /// </summary>
     public bool IsSortable { get; init; } = true;
 
     /// <summary>
-    /// Allowed filter operators for this column
+    /// Gets the allowed filter operators for this column
     /// If null, defaults will be determined by column data type
     /// </summary>
-    public List<FilterOperatorType>? AllowedFilterOperators { get; init; }
+    public ICollection<FilterOperatorType>? AllowedFilterOperators { get; init; }
 
     /// <summary>
-    /// Default filter operator (first in AllowedFilterOperators if not set)
+    /// Gets the default filter operator (first in AllowedFilterOperators if not set)
     /// </summary>
     public FilterOperatorType? DefaultFilterOperator { get; init; }
 
     /// <summary>
-    /// Enable grouping for this column
+    /// Gets whether grouping is enabled for this column
     /// </summary>
-    public bool IsGroupable { get; init; } = false;
+    public bool IsGroupable { get; init; }
 
     /// <summary>
-    /// Column can be reordered by user
+    /// Gets whether the column can be reordered by user
     /// </summary>
     public bool CanReorder { get; init; } = true;
 
     /// <summary>
-    /// Column can be frozen by user
+    /// Gets whether the column can be frozen by user
     /// </summary>
-    public bool CanFreeze { get; init; } = false;
+    public bool CanFreeze { get; init; }
 
     /// <summary>
-    /// Data type of the column (used for automatic filter operator selection)
+    /// Gets the data type of the column (used for automatic filter operator selection)
     /// </summary>
     public Type? DataType { get; init; }
 }
@@ -56,40 +56,53 @@ public abstract class SmartTableRegularColumn : UniTableRegularColumn
 /// <summary>
 /// Typed SmartTable column with property selector
 /// </summary>
+/// <typeparam name="T">The type of the data model</typeparam>
 public class SmartTableRegularColumn<T> : SmartTableRegularColumn
 {
+    /// <summary>
+    /// Gets the expression that selects the property to bind to
+    /// </summary>
     public required Expression<Func<T, object>> PropertySelector { get; init; }
 
+    /// <summary>
+    /// Gets the property name from the property selector expression
+    /// </summary>
+    /// <returns>The name of the property</returns>
     public override string GetPropertyName()
     {
-        ArgumentNullException.ThrowIfNull(PropertySelector);
+        ArgumentNullException.ThrowIfNull(this.PropertySelector);
 
-        return PropertySelector.Body switch
+        return this.PropertySelector.Body switch
         {
             UnaryExpression { Operand: MemberExpression memberExpression }
                 => memberExpression.Member.Name,
             MemberExpression memberExpression =>
                 memberExpression.Member.Name,
             _ =>
-                throw new InvalidOperationException("Invalid expression - property selector must reference a property")
+                throw new InvalidOperationException("Invalid expression - property selector must reference a property"),
         };
     }
 
     /// <summary>
-    /// Get the data type from the property selector if not explicitly set
+    /// Gets the data type from the property selector if not explicitly set
     /// </summary>
-    public Type GetDataType()
+    public Type ColumnDataType
     {
-        if (DataType != null)
-            return DataType;
-
-        return PropertySelector.Body switch
+        get
         {
-            UnaryExpression { Operand: MemberExpression memberExpression }
-                => memberExpression.Type,
-            MemberExpression memberExpression =>
-                memberExpression.Type,
-            _ => typeof(object)
-        };
+            if (this.DataType != null)
+            {
+                return this.DataType;
+            }
+
+            return this.PropertySelector.Body switch
+            {
+                UnaryExpression { Operand: MemberExpression memberExpression }
+                    => memberExpression.Type,
+                MemberExpression memberExpression =>
+                    memberExpression.Type,
+                _ => typeof(object),
+            };
+        }
     }
 }
