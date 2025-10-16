@@ -1,0 +1,145 @@
+<UserControl x:Class="Calibrator.WpfControl.Sandbox.Views.DataLoadingDemo"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:Calibrator.WpfControl.Sandbox.ViewModels"
+             xmlns:smartTable="clr-namespace:Calibrator.WpfControl.Controls.ScSmartTable;assembly=Calibrator.WpfControl"
+             xmlns:scButton="clr-namespace:Calibrator.WpfControl.Controls.ScButton;assembly=Calibrator.WpfControl"
+             xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation"
+             mc:Ignorable="d"
+             d:DesignHeight="800" d:DesignWidth="1200">
+    <UserControl.DataContext>
+        <vm:DataLoadingDemoViewModel/>
+    </UserControl.DataContext>
+
+    <Grid Margin="{StaticResource Calibrator.Padding.Large}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Grid.Row="0"
+                   Text="Data Loading with RadBusyIndicator Demo" 
+                   FontSize="{StaticResource Calibrator.FontSize.XLarge}"
+                   FontWeight="Bold"
+                   Margin="0 0 0 20"/>
+
+        <!-- Description -->
+        <Border Grid.Row="1"
+                Background="{StaticResource Calibrator.Brush.Surface}"
+                Padding="{StaticResource Calibrator.Padding.Medium}"
+                CornerRadius="{StaticResource Calibrator.CornerRadius.Medium}"
+                Margin="0 0 0 20">
+            <StackPanel>
+                <TextBlock Text="Data Loading Features:" 
+                           FontWeight="Bold" 
+                           FontSize="{StaticResource Calibrator.FontSize.Large}"
+                           Margin="0 0 0 10"/>
+                <TextBlock TextWrapping="Wrap">
+                    <Run Text="• "/>
+                    <Run Text="Automatic loading state management using [RelayCommandWithLoading] attribute" FontWeight="SemiBold"/>
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap">
+                    <Run Text="• "/>
+                    <Run Text="Telerik RadBusyIndicator displays during data loading"/>
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap">
+                    <Run Text="• "/>
+                    <Run Text="Table is hidden during loading, visible after data loads"/>
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap">
+                    <Run Text="• "/>
+                    <Run Text="Simulated 3-second loading delay to demonstrate the busy indicator"/>
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap">
+                    <Run Text="• "/>
+                    <Run Text="Data loads automatically on initialization"/>
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" Margin="0 10 0 0" FontStyle="Italic">
+                    <Run Text="Click 'Refresh Data' button to reload the table with a 3-second delay!"/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- Action Buttons and Status -->
+        <Grid Grid.Row="2" Margin="0 0 0 20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Refresh Button -->
+            <scButton:ScButtonComponent
+                Grid.Column="0"
+                Content="Refresh Data"
+                ButtonType="Accent"
+                IconKind="Refresh"
+                Command="{Binding RefreshDataCommand}"
+                ButtonWidth="180"
+                Margin="0 0 20 0"/>
+
+            <!-- Status Information -->
+            <Border Grid.Column="1"
+                    Background="{StaticResource Calibrator.Brush.Surface}"
+                    Padding="15 10"
+                    CornerRadius="{StaticResource Calibrator.CornerRadius.Small}"
+                    VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Total Records: "
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Margin="0 0 5 0"/>
+                    <TextBlock Text="{Binding TotalRecords}"
+                               VerticalAlignment="Center"
+                               Margin="0 0 20 0"/>
+                    
+                    <TextBlock Text="Last Load: "
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Margin="0 0 5 0"/>
+                    <TextBlock Text="{Binding LastLoadTime, StringFormat='HH:mm:ss'}"
+                               VerticalAlignment="Center"/>
+                    
+                    <TextBlock Text="(Loading will take 3 seconds)"
+                               FontStyle="Italic"
+                               Foreground="{StaticResource Calibrator.Brush.TextSecondary}"
+                               VerticalAlignment="Center"
+                               Margin="20 0 0 0"
+                               Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibility}}"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Data Content Area with RadBusyIndicator -->
+        <telerik:RadBusyIndicator Grid.Row="3"
+                                  IsBusy="{Binding IsLoading}"
+                                  BusyContent="Loading employee data..."
+                                  DisplayAfter="0"
+                                  IsIndeterminate="True">
+            
+            <!-- SmartTable - Only visible when not loading -->
+            <Border BorderBrush="{StaticResource Calibrator.Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource Calibrator.CornerRadius.Medium}">
+                <smartTable:ScSmartTableComponent 
+                    x:Name="EmployeeTable"
+                    Columns="{Binding Columns}"
+                    ItemsSource="{Binding Employees}"
+                    TableOperations="{Binding TableOperations}"
+                    EnableFiltering="True"
+                    EnableSorting="True"
+                    EnableGrouping="True"
+                    EnableColumnReordering="True"
+                    EnableColumnFreezing="True"
+                    ShowColumnFooters="False"
+                    ShowSearchPanel="True"
+                    FilteringMode="FilterRow"/>
+            </Border>
+        </telerik:RadBusyIndicator>
+    </Grid>
+</UserControl>
+

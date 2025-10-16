@@ -25,6 +25,7 @@ public class PersonModel : INotifyPropertyChanged
     private bool _isActive;
     private decimal _salary;
     private DateTime _hireDate;
+    private string _department = string.Empty;
 
     public int Id
     {
@@ -72,6 +73,12 @@ public class PersonModel : INotifyPropertyChanged
     {
         get => _hireDate;
         set { _hireDate = value; OnPropertyChanged(); }
+    }
+
+    public string Department
+    {
+        get => _department;
+        set { _department = value; OnPropertyChanged(); }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

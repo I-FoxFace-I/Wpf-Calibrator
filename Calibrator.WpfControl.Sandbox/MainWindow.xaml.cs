@@ -27,6 +27,8 @@ public partial class MainWindow : Window
     public ICommand ShowTextBlockDemoCommand => new RelayCommand(() => ShowTextBlockDemo());
     public ICommand ShowNumericDemoCommand => new RelayCommand(() => ShowNumericDemo());
     public ICommand ShowDropdownDemoCommand => new RelayCommand(() => ShowDropdownDemo());
+    public ICommand ShowLoadingCommandDemoCommand => new RelayCommand(() => ShowLoadingCommandDemo());
+    public ICommand ShowDataLoadingDemoCommand => new RelayCommand(() => ShowDataLoadingDemo());
     public ICommand ShowUniTableDemoCommand => new RelayCommand(() => ShowUniTableDemo());
     public ICommand ShowSmartTableDemoCommand => new RelayCommand(() => ShowSmartTableDemo());
     public ICommand ShowUniFormDemoCommand => new RelayCommand(() => ShowUniFormDemo());
@@ -55,6 +57,11 @@ public partial class MainWindow : Window
     private void ShowDropdownDemo()
     {
         this.ContentArea.Content = new DropdownDemo();
+    }
+
+    private void ShowDataLoadingDemo()
+    {
+        this.ContentArea.Content = new DataLoadingDemo();
     }
 
     private void ShowUniTableDemo()

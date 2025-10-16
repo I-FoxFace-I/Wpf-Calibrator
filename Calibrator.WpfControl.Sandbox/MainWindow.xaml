@@ -52,9 +52,7 @@
                                            ButtonType="Transparent"
                                            Command="{Binding ShowDropdownDemoCommand}"
                                            Margin="0 0 0 20"/>
-
                 
-
                 <scButton:ScButtonComponent Content="ScSmartTable" 
                                             UppercaseText="False"
                                            ButtonType="Transparent"
@@ -67,7 +65,12 @@
                                             UppercaseText="False"
                                            ButtonType="Transparent"
                                            Command="{Binding ShowSmartContainerDemoCommand}"
-                                           Margin="0 0 0 40"/>
+                                           Margin="0 0 0 20"/>
+                <scButton:ScButtonComponent Content="Data Loading" 
+                            UppercaseText="False"
+                           ButtonType="Transparent"
+                           Command="{Binding ShowDataLoadingDemoCommand}"
+                           Margin="0 0 0 40"/>
 
                 <scButton:ScButtonComponent Content="UniTable" 
                             UppercaseText="False"

@@ -13,11 +13,16 @@
 		<GenerateDocumentationFile>false</GenerateDocumentationFile>
 		<AnalysisLevel>none</AnalysisLevel>
 		<AnalysisMode>none</AnalysisMode>
+	  
 		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+		
+		<!-- Enable source generator output to files for debugging -->
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\Generated</CompilerGeneratedFilesOutputPath>
 	</PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Calibrator.WpfControl\Calibrator.WpfControl.csproj" />
-	  
+    <ProjectReference Include="..\..\src\Calibrator.WpfControl.SourceGenerators\Calibrator.WpfControl.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
