@@ -1,0 +1,40 @@
+<base:BaseView
+    Style="{StaticResource BaseViewStyle}"
+    x:Class="Calibrator.WpfApplication.Views.TransducersOverviewView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:scButton="clr-namespace:Calibrator.WpfApplication.Views.Components.ScButton"
+    xmlns:uniTable="clr-namespace:Calibrator.WpfApplication.Views.Components.UniTable"
+    xmlns:vm="clr-namespace:Calibrator.WpfApplication.ViewModels"
+    xmlns:base="clr-namespace:Calibrator.WpfApplication.Views.Base"
+    d:DataContext="{d:DesignInstance Type=vm:TransducersOverviewViewModel, IsDesignTimeCreatable=False}"
+    mc:Ignorable="d"
+    Title="Transducers" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Margin="0 50 0 0">
+            <scButton:ScButtonComponent
+                Content="Add New" ButtonType="Regular" IconKind="Plus" ButtonWidth="160"
+                Margin="0 0 30 0"
+                Command="{Binding AddNewCommand}" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" VerticalAlignment="Top" Margin="0 15 0 0">
+            <uniTable:UniTableComponent
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                ItemsSource="{Binding Transducers}"
+                Columns="{Binding Columns}"
+                TableOperations="{Binding TableOperations}">
+            </uniTable:UniTableComponent>
+        </Grid>
+    </Grid>
+</base:BaseView>
+

@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		
+		<!-- NuGet Package Configuration -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>HierarchicalMvvm.Core</PackageId>
+		<PackageVersion>1.0.0</PackageVersion>
+		<Authors>I-FoxFace-I</Authors>
+		<Company>I-FoxFace-I</Company>
+		<Description>Core framework for hierarchical MVVM pattern with event propagation</Description>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/I-FoxFace-I/HierarchicalMvvm</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/I-FoxFace-I/HierarchicalMvvm</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>mvvm;wpf;hierarchical;observable;binding</PackageTags>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\HierarchicalMvvm.Attributes\HierarchicalMvvm.Attributes.csproj" />
+	</ItemGroup>
+</Project>
+
+
+
+
+
+
+

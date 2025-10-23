@@ -1,0 +1,19 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation">
+    
+    <!-->Font issues <-->
+    <Style TargetType="telerik:GridViewHeaderCell" >
+        <Setter Property="Foreground" Value="#757575"/> <!-- Change text color for headers -->
+        <Setter Property="FontSize" Value="12"/> <!-- Change text color for headers -->
+    </Style>
+    
+    <Style TargetType="telerik:GridViewCell">
+        <Setter Property="Foreground" Value="#000"/> <!-- Change text color for cells -->
+        <Setter Property="FontSize" Value="14"/> <!-- Change text color for headers -->
+    </Style>
+                
+  
+</ResourceDictionary>
+
+

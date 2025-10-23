@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+		<OutputItemType>Analyzer</OutputItemType>
+		<IsRoslynAnalyzer>true</IsRoslynAnalyzer>
+		<PackageId>HierarchicalMvvm.Generator</PackageId>
+		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+		<PackageVersion>1.0.0</PackageVersion>
+		
+		<!-- NuGet Package Configuration -->
+		<Authors>I-FoxFace-I</Authors>
+		<Company>I-FoxFace-I</Company>
+		<Description>Source generator for HierarchicalMvvm framework</Description>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/I-FoxFace-I/HierarchicalMvvm</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/I-FoxFace-I/HierarchicalMvvm</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>mvvm;wpf;hierarchical;source-generator;roslyn</PackageTags>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="build\HierarchicalMvvm.Generator.props" Pack="true" PackagePath="build\" />
+		<None Include="build\HierarchicalMvvm.Generator.targets" Pack="true" PackagePath="build\" />
+	</ItemGroup>
+
+	<!-- Kopírování analyzerů do správné struktury -->
+	<ItemGroup>
+		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers\dotnet\cs\" />
+		<None Include="$(OutputPath)\$(AssemblyName).pdb" Pack="true" PackagePath="analyzers\dotnet\cs\" Condition="Exists('$(OutputPath)\$(AssemblyName).pdb')" />
+		<None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="lib\netstandard2.0\" />
+		<None Include="$(OutputPath)$(AssemblyName).pdb" Pack="true" PackagePath="lib\netstandard2.0\" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
+	</ItemGroup>
+</Project>
+
+
+
+
+

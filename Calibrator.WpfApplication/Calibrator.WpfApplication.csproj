@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+	<UserSecretsId>7a438bba-da21-46a7-a685-bbe80892dcdd</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="AutoMapper" Version="15.0.1" />
+	  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+	  <PackageReference Include="CSharpFunctionalExtensions" Version="3.6.0" />
+	  <PackageReference Include="FreeSpire.Doc" Version="12.2.0" />
+	  <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="6.1.0" />
+	  <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+	  <PackageReference Include="Metalama.Framework" Version="2025.1.12" />
+	  <PackageReference Include="Microsoft.AppCenter.Analytics" Version="5.0.7" />
+	  <PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.7" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.8">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
+	  <PackageReference Include="Microsoft.Graph" Version="5.90.0" />
+	  <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+	  <PackageReference Include="NetSparkleUpdater.SparkleUpdater" Version="3.0.3" />
+	  <PackageReference Include="NetSparkleUpdater.UI.WPF" Version="3.0.3" />
+	  <PackageReference Include="OxyPlot.Wpf" Version="2.2.0" />
+	  <PackageReference Include="PDFsharp" Version="6.2.1" />
+	  <PackageReference Include="Spire.Doc" Version="13.8.1" />
+	  <PackageReference Include="System.Reactive" Version="6.0.1" />
+	  <PackageReference Include="Telerik.Windows.Controls.Charting.for.Wpf.Xaml" Version="2025.3.813" />
+	  <PackageReference Include="Telerik.Windows.Controls.Data.for.Wpf.Xaml" Version="2025.3.813" />
+	  <PackageReference Include="Telerik.Windows.Controls.for.Wpf.Xaml" Version="2025.3.813" />
+	  <PackageReference Include="Telerik.Windows.Controls.GridView.for.Wpf.Xaml" Version="2025.3.813" />
+	  <PackageReference Include="Telerik.Windows.Controls.ImageEditor.for.Wpf.Xaml" Version="2025.3.813" />
+	  <PackageReference Include="Telerik.Windows.Controls.Input.for.Wpf.Xaml" Version="2025.3.813" />
+	  <PackageReference Include="Telerik.Windows.Controls.Navigation.for.Wpf.Xaml" Version="2025.3.813" />
+	  <PackageReference Include="Telerik.Windows.Controls.VirtualGrid.for.Wpf.Xaml" Version="2025.3.813" />
+	  <PackageReference Include="Telerik.Windows.Data.for.Wpf.Xaml" Version="2025.3.813" />
+	  <PackageReference Include="Unity" Version="5.11.10" />
+	  <PackageReference Include="Vanara.Windows.Shell" Version="4.1.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Fonts\**" />
+    <Resource Include="Images\**" />
+  </ItemGroup>
+	
+</Project>
+

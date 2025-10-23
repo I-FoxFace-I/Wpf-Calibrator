@@ -1,0 +1,237 @@
+<local:ScopedWindow xmlns:local="clr-namespace:AutofacEnhancedWpfDemo.Views"
+                    x:Class="AutofacEnhancedWpfDemo.Views.OrderDetailWindow"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+					xmlns:converters="clr-namespace:AutofacEnhancedWpfDemo.Converters"
+                    Title="Order Detail"
+                    Width="700" Height="900"
+                    WindowStartupLocation="CenterOwner"
+                    Background="#F8F9FA">
+
+	<local:ScopedWindow.Resources>
+
+		<ResourceDictionary>
+			<converters:StepVisibilityConverter x:Key="StepVisibilityConverter"/>
+			<converters:MultiplyConverter x:Key="MultiplyConverter"/>
+
+			<Style TargetType="DataGrid">
+				<Setter Property="Background" Value="White"/>
+				<Setter Property="BorderThickness" Value="0"/>
+				<Setter Property="GridLinesVisibility" Value="None"/>
+				<Setter Property="HeadersVisibility" Value="Column"/>
+				<Setter Property="AutoGenerateColumns" Value="False"/>
+				<Setter Property="IsReadOnly" Value="True"/>
+				<Setter Property="SelectionMode" Value="Single"/>
+				<Setter Property="RowHeight" Value="40"/>
+				<Setter Property="FontSize" Value="14"/>
+			</Style>
+
+			<Style TargetType="DataGridColumnHeader">
+				<Setter Property="Background" Value="#F1F5F9"/>
+				<Setter Property="Foreground" Value="#334155"/>
+				<Setter Property="FontWeight" Value="SemiBold"/>
+				<Setter Property="Padding" Value="12,10"/>
+				<Setter Property="BorderThickness" Value="0,0,0,1"/>
+				<Setter Property="BorderBrush" Value="#E2E8F0"/>
+			</Style>
+
+			<Style TargetType="DataGridRow">
+				<Setter Property="Background" Value="White"/>
+			</Style>
+
+			<Style TargetType="DataGridCell">
+				<Setter Property="BorderThickness" Value="0"/>
+				<Setter Property="Padding" Value="12,0"/>
+				<Setter Property="Template">
+					<Setter.Value>
+						<ControlTemplate TargetType="DataGridCell">
+							<Border Background="{TemplateBinding Background}"
+									Padding="{TemplateBinding Padding}">
+								<ContentPresenter VerticalAlignment="Center"/>
+							</Border>
+						</ControlTemplate>
+					</Setter.Value>
+				</Setter>
+			</Style>
+
+			<Style x:Key="CloseButton" TargetType="Button">
+				<Setter Property="Padding" Value="24,12"/>
+				<Setter Property="FontSize" Value="14"/>
+				<Setter Property="FontWeight" Value="SemiBold"/>
+				<Setter Property="Cursor" Value="Hand"/>
+				<Setter Property="Background" Value="#6B7280"/>
+				<Setter Property="Foreground" Value="White"/>
+				<Setter Property="BorderThickness" Value="0"/>
+				<Setter Property="Template">
+					<Setter.Value>
+						<ControlTemplate TargetType="Button">
+							<Border Background="{TemplateBinding Background}"
+									CornerRadius="6"
+									Padding="{TemplateBinding Padding}">
+								<ContentPresenter HorizontalAlignment="Center"
+												VerticalAlignment="Center"/>
+							</Border>
+						</ControlTemplate>
+					</Setter.Value>
+				</Setter>
+				<Style.Triggers>
+					<Trigger Property="IsMouseOver" Value="True">
+						<Setter Property="Background" Value="#4B5563"/>
+					</Trigger>
+				</Style.Triggers>
+			</Style>
+		</ResourceDictionary>
+	</local:ScopedWindow.Resources>
+
+	<Grid Margin="32">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+
+		<!-- Header -->
+		<StackPanel Grid.Row="0" Margin="0,0,0,24">
+			<TextBlock Text="📦 Order Detail"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="#1E293B"/>
+			<TextBlock Text="Complete order information"
+                       FontSize="14"
+                       Foreground="#64748B"
+                       Margin="0,4,0,0"/>
+		</StackPanel>
+
+		<!-- Order Info -->
+		<Border Grid.Row="1"
+                Background="White"
+                CornerRadius="8"
+                Padding="20"
+                Margin="0,0,0,16">
+			<Border.Effect>
+				<DropShadowEffect Color="#000000" Opacity="0.05" BlurRadius="10" ShadowDepth="0"/>
+			</Border.Effect>
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="*"/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+				</Grid.RowDefinitions>
+
+				<StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,12">
+					<TextBlock Text="Order ID"
+                               FontSize="12"
+                               Foreground="#64748B"
+                               FontWeight="Medium"/>
+					<TextBlock Text="{Binding Order.Id}"
+                               FontSize="16"
+                               Foreground="#1E293B"
+                               FontWeight="SemiBold"
+                               Margin="0,4,0,0"/>
+				</StackPanel>
+
+				<StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
+					<TextBlock Text="Order Date"
+                               FontSize="12"
+                               Foreground="#64748B"
+                               FontWeight="Medium"/>
+					<TextBlock Text="{Binding Order.OrderDate, StringFormat='yyyy-MM-dd HH:mm'}"
+                               FontSize="16"
+                               Foreground="#1E293B"
+                               FontWeight="SemiBold"
+                               Margin="0,4,0,0"/>
+				</StackPanel>
+
+				<StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+					<TextBlock Text="Customer"
+                               FontSize="12"
+                               Foreground="#64748B"
+                               FontWeight="Medium"/>
+					<TextBlock Text="{Binding Order.Customer.Name}"
+                               FontSize="16"
+                               Foreground="#1E293B"
+                               FontWeight="SemiBold"
+                               Margin="0,4,0,0"/>
+				</StackPanel>
+			</Grid>
+		</Border>
+
+		<!-- Order Items -->
+		<Border Grid.Row="2"
+                Background="White"
+                CornerRadius="8"
+                Padding="0"
+                Margin="0,0,0,16">
+			<Border.Effect>
+				<DropShadowEffect Color="#000000" Opacity="0.05" BlurRadius="10" ShadowDepth="0"/>
+			</Border.Effect>
+			<StackPanel>
+				<TextBlock Text="Order Items"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="#1E293B"
+                           Margin="20,20,20,16"/>
+
+				<DataGrid ItemsSource="{Binding Order.Items}">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Product"
+                                            Binding="{Binding Product.Name}"
+                                            Width="*"/>
+						<DataGridTextColumn Header="Unit Price"
+                                            Binding="{Binding UnitPrice, StringFormat=C2}"
+                                            Width="120"/>
+						<DataGridTextColumn Header="Quantity"
+                                            Binding="{Binding Quantity}"
+                                            Width="100"/>
+						<DataGridTextColumn Header="Total"
+                                            Width="120">
+							<DataGridTextColumn.Binding>
+								<MultiBinding Converter="{StaticResource MultiplyConverter}">
+									<Binding Path="Quantity"/>
+									<Binding Path="UnitPrice"/>
+								</MultiBinding>
+							</DataGridTextColumn.Binding>
+						</DataGridTextColumn>
+					</DataGrid.Columns>
+				</DataGrid>
+			</StackPanel>
+		</Border>
+
+		<!-- Total -->
+		<Border Grid.Row="3"
+                Background="#3B82F6"
+                CornerRadius="8"
+                Padding="20"
+                Margin="0,0,0,16">
+			<Border.Effect>
+				<DropShadowEffect Color="#000000" Opacity="0.1" BlurRadius="10" ShadowDepth="0"/>
+			</Border.Effect>
+			<Grid>
+				<TextBlock Text="Order Total:"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="White"
+                           VerticalAlignment="Center"/>
+				<TextBlock Text="{Binding Order.Total, StringFormat=C2}"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="White"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"/>
+			</Grid>
+		</Border>
+
+		<!-- Close Button -->
+		<Button Grid.Row="4"
+                Content="Close"
+                Command="{Binding CloseCommand}"
+                Style="{StaticResource CloseButton}"
+                HorizontalAlignment="Right"/>
+	</Grid>
+</local:ScopedWindow>

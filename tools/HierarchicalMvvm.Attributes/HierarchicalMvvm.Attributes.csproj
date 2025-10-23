@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<PackageVersion>1.0.0</PackageVersion>
+		
+		<!-- NuGet Package Configuration -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>HierarchicalMvvm.Attributes</PackageId>
+		<PackageVersion>1.0.0</PackageVersion>
+		<Authors>I-FoxFace-I</Authors>
+		<Company>I-FoxFace-I</Company>
+		<Description>Attributes for HierarchicalMvvm framework</Description>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/I-FoxFace-I/HierarchicalMvvm</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/I-FoxFace-I/HierarchicalMvvm</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>mvvm;wpf;hierarchical;attributes</PackageTags>
+	</PropertyGroup>
+</Project>
+
+
+
+
+
+
+

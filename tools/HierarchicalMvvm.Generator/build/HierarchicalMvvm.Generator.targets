@@ -1,0 +1,21 @@
+<Project>
+  <!-- Analyzer pro Debug konfiguraci -->
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <Analyzer Include="$(MSBuildThisFileDirectory)..\..\bin\Debug\netstandard2.0\HierarchicalMvvm.Generator.dll" />
+  </ItemGroup>
+  
+  <!-- Analyzer pro Release konfiguraci -->
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <Analyzer Include="$(MSBuildThisFileDirectory)..\..\bin\Release\netstandard2.0\HierarchicalMvvm.Generator.dll" />
+  </ItemGroup>
+  
+  <!-- Analyzer pro ostatní konfigurace -->
+  <ItemGroup Condition="'$(Configuration)' != 'Debug' AND '$(Configuration)' != 'Release'">
+    <Analyzer Include="$(MSBuildThisFileDirectory)..\..\bin\$(Configuration)\netstandard2.0\HierarchicalMvvm.Generator.dll" />
+  </ItemGroup>
+  
+  <!-- Přidání reference na Attributes projekt -->
+  <ItemGroup>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\..\HierarchicalMvvm.Attributes\HierarchicalMvvm.Attributes.csproj" />
+  </ItemGroup>
+</Project>

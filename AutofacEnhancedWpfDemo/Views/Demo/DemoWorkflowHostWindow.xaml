@@ -1,0 +1,66 @@
+﻿<local:ScopedWindow xmlns:local="clr-namespace:AutofacEnhancedWpfDemo.Views"
+                    xmlns:demo="clr-namespace:AutofacEnhancedWpfDemo.Views.Demo"
+                    xmlns:vm="clr-namespace:AutofacEnhancedWpfDemo.ViewModels.Demo"
+                    x:Class="AutofacEnhancedWpfDemo.Views.Demo.DemoWorkflowHostWindow"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    Title="🚀 Workflow with INavigator"
+                    Width="900" Height="700"
+                    WindowStartupLocation="CenterScreen"
+                    Background="#F8F9FA">
+
+    <local:ScopedWindow.Resources>
+        <!-- DataTemplate for Step 1 ViewModel -->
+        <DataTemplate DataType="{x:Type vm:DemoWorkflowStep1ViewModel}">
+            <demo:DemoWorkflowStep1View />
+        </DataTemplate>
+
+        <!-- DataTemplate for Step 2 ViewModel -->
+        <DataTemplate DataType="{x:Type vm:DemoWorkflowStep2ViewModel}">
+            <demo:DemoWorkflowStep2View />
+        </DataTemplate>
+
+        <!-- DataTemplate for Step 3 ViewModel -->
+        <DataTemplate DataType="{x:Type vm:DemoWorkflowStep3ViewModel}">
+            <demo:DemoWorkflowStep3View />
+        </DataTemplate>
+
+        <!-- Converter for null to bool -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+    </local:ScopedWindow.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" 
+                Background="#10B981" 
+                CornerRadius="8" 
+                Padding="20"
+                Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="🚀 Workflow with INavigator" 
+                           FontSize="24" 
+                           FontWeight="Bold" 
+                           Foreground="White"/>
+                <TextBlock Text="ViewModel navigation within single window - no CurrentStep property!" 
+                           FontSize="14" 
+                           Foreground="#D1FAE5"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Content Control for Navigation -->
+        <!-- Binds to CurrentContent which comes from Navigator.CurrentViewModel -->
+        <Border Grid.Row="1" 
+                Background="White" 
+                CornerRadius="8"
+                Padding="0">
+            <ContentControl Content="{Binding CurrentContent}" />
+        </Border>
+    </Grid>
+</local:ScopedWindow>
+
