@@ -174,3 +174,50 @@ public class NotNullToBoolConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+/// <summary>
+/// Converts boolean to custom string based on parameter
+/// Parameter format: "TrueText|FalseText"
+/// Example: "Hide|Show" or "Yes|No"
+/// </summary>
+public class BoolToStringConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is not bool boolValue || parameter is not string paramStr)
+            return string.Empty;
+
+        var parts = paramStr.Split('|');
+        if (parts.Length != 2)
+            return string.Empty;
+
+        return boolValue ? parts[0] : parts[1];
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+/// <summary>
+/// Checks if value is null
+/// Returns true if null, false otherwise
+/// Parameter: "Inverted" to invert the logic
+/// </summary>
+public class NullToBoolConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        bool isNull = value == null;
+        bool invert = parameter is string str && str.Equals("Inverted", StringComparison.OrdinalIgnoreCase);
+
+        return invert ? !isNull : isNull;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+

@@ -1,0 +1,42 @@
+﻿using Autofac;
+using AutofacEnhancedWpfDemo.ViewModels.Demo;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+
+namespace AutofacEnhancedWpfDemo.Views.Demo
+{
+    /// <summary>
+    /// Interaction logic for DemoProductInfoWindow.xaml
+    /// </summary>
+    public partial class DemoProductInfoWindow : ScopedWindow
+    {
+        public DemoProductInfoWindow(
+            ILifetimeScope parentScope,
+            ILogger<DemoProductInfoWindow> logger)
+            : base(parentScope, logger, "demo-product-info")
+        {
+            InitializeComponent();
+            Loaded += async (s, e) => await OnLoadedAsync();
+        }
+
+        private async Task OnLoadedAsync()
+        {
+            if (DataContext is DemoProductInfoViewModel vm)
+            {
+                await vm.InitializeAsync();
+            }
+        }
+    }
+}

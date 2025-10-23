@@ -11,6 +11,8 @@
             <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
             <converters:StringToColorConverter x:Key="StepColorConverter"/>
             <converters:NotNullToBoolConverter x:Key="NotNullToBoolConverter"/>
+            <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
+            <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
             <!-- Global Styles -->
             <Style TargetType="Window">
                 <Setter Property="FontFamily" Value="Segoe UI, Arial"/>

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Core;
@@ -23,6 +22,7 @@ public class Navigator : INavigator, INotifyPropertyChanged
     private object? _currentViewModel;
 
     public event PropertyChangedEventHandler? PropertyChanged;
+    public event EventHandler<WindowCloseRequestedEventArgs>? WindowCloseRequested;
 
     public object? CurrentViewModel
     {
@@ -31,7 +31,6 @@ public class Navigator : INavigator, INotifyPropertyChanged
         {
             if (_currentViewModel != value)
             {
-                // Dispose old VM if it's disposable
                 if (_currentViewModel is IDisposable disposable)
                 {
                     _logger.LogInformation("Disposing previous ViewModel {Type}", _currentViewModel.GetType().Name);
@@ -58,19 +57,14 @@ public class Navigator : INavigator, INotifyPropertyChanged
     {
         _logger.LogInformation("Navigating to {ViewModel}", typeof(TViewModel).Name);
 
-        // Save current VM to history (but don't dispose yet - might navigate back)
         if (_currentViewModel != null)
         {
             _navigationHistory.Push(_currentViewModel);
         }
 
-        // Resolve new VM
         var viewModel = ResolveViewModel<TViewModel>(parameters);
-
-        // Set as current (will trigger PropertyChanged)
         CurrentViewModel = viewModel;
 
-        // If VM has InitializeAsync, call it
         if (viewModel is IAsyncInitializable initializable)
         {
             await initializable.InitializeAsync();
@@ -90,11 +84,8 @@ public class Navigator : INavigator, INotifyPropertyChanged
         _logger.LogInformation("Navigating back");
 
         var previousViewModel = _navigationHistory.Pop();
-
-        // Set as current (will dispose current and trigger PropertyChanged)
         CurrentViewModel = previousViewModel;
 
-        // If VM has InitializeAsync, call it
         if (previousViewModel is IAsyncInitializable initializable)
         {
             await initializable.InitializeAsync();
@@ -107,7 +98,6 @@ public class Navigator : INavigator, INotifyPropertyChanged
     {
         _logger.LogInformation("Clearing navigation history");
 
-        // Dispose all VMs in history
         while (_navigationHistory.Count > 0)
         {
             var vm = _navigationHistory.Pop();
@@ -116,6 +106,17 @@ public class Navigator : INavigator, INotifyPropertyChanged
                 disposable.Dispose();
             }
         }
+    }
+
+    public void RequestWindowClose(bool showConfirmation = false, string? confirmationMessage = null)
+    {
+        _logger.LogInformation("Requesting window close (showConfirmation: {ShowConfirmation})", showConfirmation);
+
+        WindowCloseRequested?.Invoke(this, new WindowCloseRequestedEventArgs
+        {
+            ShowConfirmation = showConfirmation,
+            ConfirmationMessage = confirmationMessage
+        });
     }
 
     private TViewModel ResolveViewModel<TViewModel>(object? parameters) where TViewModel : class

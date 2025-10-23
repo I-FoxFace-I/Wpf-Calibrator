@@ -24,7 +24,6 @@ public class DemoDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-
         modelBuilder.Entity<DemoCustomer>().HasKey(e => e.Id);
         modelBuilder.Entity<DemoAddress>().HasKey(e => e.Id);
         modelBuilder.Entity<DemoProduct>().HasKey(e => e.Id);
@@ -32,39 +31,54 @@ public class DemoDbContext : DbContext
         modelBuilder.Entity<DemoOrder>().HasKey(e => e.Id);
         modelBuilder.Entity<DemoOrderItem>().HasKey(e => e.Id);
 
-        modelBuilder.Entity<DemoAddress>(builder => builder.Property(x => x.Type).HasConversion<int>());
-        modelBuilder.Entity<DemoCustomer>(builder => builder.Property(x => x.Type).HasConversion<int>());
-        // Customer -> Addresses
+        // Enums as integers
+        modelBuilder.Entity<DemoAddress>(builder =>
+            builder.Property(x => x.Type).HasConversion<int>());
+        modelBuilder.Entity<DemoCustomer>(builder =>
+            builder.Property(x => x.Type).HasConversion<int>());
+        modelBuilder.Entity<DemoOrder>(builder =>
+            builder.Property(x => x.Status).HasConversion<int>());
+
+        // Customer -> Addresses (one-to-many)
         modelBuilder.Entity<DemoCustomer>()
             .HasMany(c => c.Addresses)
             .WithOne(a => a.Customer)
             .HasForeignKey(a => a.CustomerId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Customer -> Orders
+        // Customer -> Orders (one-to-many)
         modelBuilder.Entity<DemoCustomer>()
             .HasMany(c => c.Orders)
             .WithOne(o => o.Customer)
-            .HasForeignKey(o => o.CustomerId);
+            .HasForeignKey(o => o.CustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-        // Category -> Products
+        // Order -> ShippingAddress (optional many-to-one)
+        modelBuilder.Entity<DemoOrder>()
+            .HasOne(o => o.ShippingAddress)
+            .WithMany()
+            .HasForeignKey(o => o.ShippingAddressId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Category -> Products (one-to-many)
         modelBuilder.Entity<DemoProductCategory>()
             .HasMany(c => c.Products)
             .WithOne(p => p.Category)
             .HasForeignKey(p => p.CategoryId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // Order -> OrderItems
+        // Order -> OrderItems (one-to-many)
         modelBuilder.Entity<DemoOrder>()
             .HasMany(o => o.Items)
             .WithOne(i => i.Order)
             .HasForeignKey(i => i.OrderId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Product -> OrderItems
+        // Product -> OrderItems (one-to-many)
         modelBuilder.Entity<DemoProduct>()
             .HasMany(p => p.OrderItems)
             .WithOne(i => i.Product)
-            .HasForeignKey(i => i.ProductId);
+            .HasForeignKey(i => i.ProductId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

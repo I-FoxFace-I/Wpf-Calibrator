@@ -33,4 +33,24 @@ public interface INavigator : INotifyPropertyChanged
     /// Clears navigation history
     /// </summary>
     void ClearHistory();
+
+    /// <summary>
+    /// Event raised when Navigator requests window closure
+    /// Host ViewModel should handle this and close the window
+    /// </summary>
+    event EventHandler<WindowCloseRequestedEventArgs>? WindowCloseRequested;
+
+    /// <summary>
+    /// Requests the host window to close
+    /// </summary>
+    void RequestWindowClose(bool showConfirmation = false, string? confirmationMessage = null);
+}
+
+/// <summary>
+/// Event args for window close request
+/// </summary>
+public class WindowCloseRequestedEventArgs : EventArgs
+{
+    public bool ShowConfirmation { get; init; }
+    public string? ConfirmationMessage { get; init; }
 }

@@ -1,4 +1,5 @@
 using Autofac;
+using AutofacEnhancedWpfDemo.Services.Demo;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Globalization;
@@ -12,6 +13,7 @@ namespace AutofacEnhancedWpfDemo.Views;
 /// Base window class that creates and owns its child lifetime scope
 /// ViewModel is set as DataContext from outside
 /// Window is NOT IDisposable - scope is disposed internally on close
+/// Automatically sets window reference in Navigator if present
 /// </summary>
 public abstract class ScopedWindow : Window
 {
@@ -26,9 +28,16 @@ public abstract class ScopedWindow : Window
     {
         _myScope = parentScope.BeginLifetimeScope(scopeTag ?? GetType().Name);
         _logger = logger;
-        
+
         _logger.LogInformation("ScopedWindow [{WindowType}] created with own child scope", GetType().Name);
-        
+
+        //// Set window reference in Navigator if it exists in scope
+        //if (_myScope.TryResolve<INavigator>(out var navigator))
+        //{
+        //    navigator.SetWindow(this);
+        //    _logger.LogInformation("Navigator associated with window [{WindowType}]", GetType().Name);
+        //}
+
         Closed += OnWindowClosed;
     }
 
@@ -46,10 +55,10 @@ public abstract class ScopedWindow : Window
     private void DisposeScope()
     {
         if (_scopeDisposed) return;
-        
-        _logger.LogInformation("ScopedWindow [{WindowType}] disposing scope - cascades to all children", 
+
+        _logger.LogInformation("ScopedWindow [{WindowType}] disposing scope - cascades to all children",
             GetType().Name);
-        
+
         _myScope?.Dispose();
         _scopeDisposed = true;
     }

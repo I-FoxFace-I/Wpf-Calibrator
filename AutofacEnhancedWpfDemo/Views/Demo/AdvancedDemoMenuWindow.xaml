@@ -3,7 +3,7 @@
                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     Title="⭐ Advanced Patterns Demo"
-                    Width="600" Height="500"
+                    Width="650" Height="600"
                     WindowStartupLocation="CenterScreen"
                     Background="#F8F9FA">
 
@@ -24,7 +24,7 @@
                            FontSize="28" 
                            FontWeight="Bold" 
                            Foreground="White"/>
-                <TextBlock Text="INavigator + IWindowManager + Extended Models" 
+                <TextBlock Text="INavigator + IWindowManager + CQRS + Extended Models" 
                            FontSize="14" 
                            Foreground="#ECF0F1"
                            Margin="0,8,0,0"/>
@@ -33,32 +33,58 @@
 
         <!-- Menu -->
         <StackPanel Grid.Row="1" VerticalAlignment="Center">
-            <Button Content="👥 Demo Customer List → Detail View"
+            <Button Content="👥 Customer Management"
                     Command="{Binding OpenCustomerListCommand}"
-                    Padding="20,16"
+                    Padding="24,18"
                     Margin="0,0,0,16"
                     Background="White"
                     FontSize="16"
                     FontWeight="SemiBold"
-                    Cursor="Hand"/>
+                    Cursor="Hand">
+                <Button.Effect>
+                    <DropShadowEffect Color="#000000" Opacity="0.08" BlurRadius="12" ShadowDepth="0"/>
+                </Button.Effect>
+            </Button>
 
-            <Button Content="📦 Demo Product List → Detail View"
+            <Button Content="📦 Product Management"
                     Command="{Binding OpenProductListCommand}"
-                    Padding="20,16"
+                    Padding="24,18"
                     Margin="0,0,0,16"
                     Background="White"
                     FontSize="16"
                     FontWeight="SemiBold"
-                    Cursor="Hand"/>
+                    Cursor="Hand">
+                <Button.Effect>
+                    <DropShadowEffect Color="#000000" Opacity="0.08" BlurRadius="12" ShadowDepth="0"/>
+                </Button.Effect>
+            </Button>
 
-            <Button Content="🚀 Workflow with INavigator"
+            <Button Content="📋 Order Management"
+                    Command="{Binding OpenOrderListCommand}"
+                    Padding="24,18"
+                    Margin="0,0,0,16"
+                    Background="White"
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Cursor="Hand">
+                <Button.Effect>
+                    <DropShadowEffect Color="#000000" Opacity="0.08" BlurRadius="12" ShadowDepth="0"/>
+                </Button.Effect>
+            </Button>
+
+            <Button Content="🚀 Create New Order (Workflow)"
                     Command="{Binding OpenWorkflowCommand}"
-                    Padding="20,16"
+                    Padding="24,18"
                     Background="#10B981"
                     Foreground="White"
                     FontSize="16"
                     FontWeight="SemiBold"
-                    Cursor="Hand"/>
+                    BorderThickness="0"
+                    Cursor="Hand">
+                <Button.Effect>
+                    <DropShadowEffect Color="#000000" Opacity="0.15" BlurRadius="12" ShadowDepth="2"/>
+                </Button.Effect>
+            </Button>
         </StackPanel>
     </Grid>
 </local:ScopedWindow>
