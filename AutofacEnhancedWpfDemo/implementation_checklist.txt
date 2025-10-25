@@ -1,0 +1,279 @@
+# ✅ Implementation Checklist
+
+## 🎯 Co bylo vytvořeno (nové soubory):
+
+### **Models.Demo/** (7 souborů)
+- ✅ DemoCustomer.cs
+- ✅ DemoAddress.cs  
+- ✅ DemoProduct.cs
+- ✅ DemoProductCategory.cs
+- ✅ DemoOrder.cs
+- ✅ DemoOrderItem.cs
+- ✅ CustomerType, AddressType enums
+
+### **Data/** (2 soubory)
+- ✅ DemoDbContext.cs
+- ✅ DemoDbSeeder.cs
+
+### **Services/** (4 nové soubory)
+- ✅ INavigator.cs (NEW - ViewModel navigation)
+- ✅ Navigator.cs (NEW - implementation)
+- ✅ IWindowManager.cs (NEW - window management)
+- ✅ WindowManager.cs (NEW - implementation)
+- ✅ IAsyncInitializable interface
+
+### **Application.Demo/** (~15 souborů)
+- ✅ Customers/: Queries, Commands, Handlers (5 handlers)
+- ✅ Products/: Queries, Commands, Handlers (6 handlers)
+
+### **ViewModels.Demo/** (9 souborů)
+- ✅ AdvancedDemoMenuViewModel.cs
+- ✅ DemoCustomerListViewModel.cs
+- ✅ DemoCustomerDetailViewModel.cs
+- ✅ DemoProductListViewModel.cs
+- ✅ DemoProductDetailViewModel.cs
+- ✅ DemoWorkflowHostViewModel.cs
+- ✅ DemoWorkflowStep1ViewModel.cs
+- ✅ DemoWorkflowStep2ViewModel.cs
+- ✅ DemoWorkflowStep3ViewModel.cs
+- ✅ WorkflowState, WorkflowOrderItem classes
+
+### **Views.Demo/** (6 XAML + 6 CS souborů)
+- ✅ AdvancedDemoMenuWindow.xaml/.cs
+- ✅ DemoCustomerListWindow.xaml/.cs
+- ✅ DemoCustomerDetailWindow.xaml/.cs
+- ✅ DemoProductListWindow.xaml/.cs
+- ✅ DemoProductDetailWindow.xaml/.cs
+- ✅ DemoWorkflowHostWindow.xaml/.cs
+
+### **Configuration/** (1 soubor)
+- ✅ AdvancedDemoModule.cs
+
+### **Aktualizované soubory:**
+- ✅ ViewLocator.cs (podpora Demo namespace)
+
+---
+
+## 📝 CO MUSÍTE UPRAVIT (3-4 soubory):
+
+### **1. App.xaml.cs** 
+
+Přidejte AdvancedDemoModule do registrace:
+
+```csharp
+// V metodě OnStartup, řádek ~40
+
+// 5. Register Autofac modules
+containerBuilder.RegisterModule<DataModule>();
+containerBuilder.RegisterModule<ServicesModule>();
+containerBuilder.RegisterModule<ViewsModule>();
+containerBuilder.RegisterModule<AdvancedDemoModule>(); // ← PŘIDAT TENTO ŘÁDEK
+
+// 6. Build container
+_container = containerBuilder.Build();
+```
+
+Přidejte inicializaci Demo databáze:
+
+```csharp
+// V metodě OnStartup, PŘED mainWindow.Show()
+
+// 7. Initialize database
+InitializeDatabase();
+InitializeDemoDatabase(); // ← PŘIDAT TENTO ŘÁDEK
+
+// 8. Open main window
+var mainWindow = _container.Resolve<MainWindow>();
+```
+
+Přidejte metodu InitializeDemoDatabase:
+
+```csharp
+private void InitializeDemoDatabase()
+{
+    try
+    {
+        var contextFactory = _container!.Resolve<IDbContextFactory<DemoDbContext>>();
+        
+        using var context = contextFactory.CreateDbContext();
+        
+        context.Database.EnsureCreated();
+        DemoDbSeeder.Seed(context);
+        
+        var logger = _container.Resolve<ILogger<App>>();
+        logger.LogInformation("Demo database initialized successfully");
+    }
+    catch (Exception ex)
+    {
+        var logger = _container!.Resolve<ILogger<App>>();
+        logger.LogError(ex, "Failed to initialize demo database");
+        throw;
+    }
+}
+```
+
+---
+
+### **2. MainViewModel.cs**
+
+Přidejte IWindowManager dependency:
+
+```csharp
+public partial class MainViewModel : BaseViewModel
+{
+    private readonly IWindowManager _windowManager; // ← ZMĚNIT z INavigator
+    
+    public MainViewModel(
+        IWindowManager windowManager, // ← ZMĚNIT z INavigator
+        ILogger<MainViewModel> logger) : base(logger)
+    {
+        _windowManager = windowManager;
+    }
+    
+    // Stávající commands zůstávají stejné...
+    
+    // PŘIDAT NOVÝ COMMAND:
+    [RelayCommand]
+    private void OpenAdvancedDemo()
+    {
+        Logger.LogInformation("Opening Advanced Patterns Demo");
+        _windowManager.ShowWindow<AdvancedDemoMenuViewModel>();
+    }
+}
+```
+
+---
+
+### **3. MainWindow.xaml**
+
+Přidejte tlačítko pro Advanced Demo:
+
+```xml
+<StackPanel Grid.Row="1" VerticalAlignment="Center">
+    <Button Content="🔗 Scope Hierarchy Demo (★ Advanced)"
+            Command="{Binding OpenScopeHierarchyDemoCommand}"
+            Style="{StaticResource SpecialButton}"/>
+    
+    <!-- ↓↓↓ PŘIDAT TENTO BUTTON ↓↓↓ -->
+    <Button Content="⭐ Advanced Patterns Demo (★★ NEW!)"
+            Command="{Binding OpenAdvancedDemoCommand}"
+            Style="{StaticResource SpecialButton}"
+            Margin="0,0,0,12"/>
+    <!-- ↑↑↑ KONEC PŘIDÁNÍ ↑↑↑ -->
+    
+    <Button Content="📦 Products Management"
+            Command="{Binding OpenProductsCommand}"
+            Style="{StaticResource MenuButton}"/>
+    
+    <!-- ... zbytek buttonů ... -->
+</StackPanel>
+```
+
+---
+
+### **4. ServicesModule.cs** (OPTIONAL - pokud chcete IWindowManager v hlavní app)
+
+Pokud chcete použít IWindowManager i ve stávající aplikaci (např. pro MainViewModel):
+
+```csharp
+public class ServicesModule : Module
+{
+    protected override void Load(ContainerBuilder builder)
+    {
+        // ViewLocator - Singleton
+        builder.RegisterType<ViewLocator>()
+               .As<IViewLocator>()
+               .SingleInstance();
+        
+        // ← PŘIDAT POKUD CHCETE IWindowManager V HLAVNÍ APP
+        // IWindowManager - InstancePerLifetimeScope
+        builder.RegisterType<WindowManager>()
+               .As<IWindowManager>()
+               .InstancePerLifetimeScope();
+        
+        // Register all Command Handlers
+        builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
+               .AsClosedTypesOf(typeof(ICommandHandler<>))
+               .InstancePerDependency();
+        
+        // Register all Query Handlers
+        builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
+               .AsClosedTypesOf(typeof(IQueryHandler<,>))
+               .InstancePerDependency();
+    }
+}
+```
+
+---
+
+## 🚀 Testování:
+
+### **Krok 1: Build**
+```bash
+dotnet build
+```
+Mělo by proběhnout BEZ CHYB.
+
+### **Krok 2: Spuštění**
+```bash
+dotnet run
+```
+
+### **Krok 3: Test Advanced Demo**
+1. ✅ Otevře se MainWindow
+2. ✅ Klikněte na "⭐ Advanced Patterns Demo"
+3. ✅ Otevře se AdvancedDemoMenuWindow
+4. ✅ Klikněte "👥 Demo Customer List"
+5. ✅ Měli byste vidět 3 zákazníky s rozšířenými daty
+6. ✅ Select customer → Click "View Detail"
+7. ✅ Měli byste vidět všechna data + adresy
+8. ✅ Test stejně pro Products
+9. ✅ Test "🚀 Workflow with INavigator"
+10. ✅ Workflow naviguje pomocí INavigator (Step 1 → 2 → 3)
+
+---
+
+## 🎯 Výsledek:
+
+Po těchto úpravách budete mít:
+
+✅ **Stávající aplikace** - nezměněná, plně funkční  
+✅ **Advanced Demo modul** - ukázka INavigator + IWindowManager  
+✅ **Detail views** - zobrazení všech dat včetně relací  
+✅ **Workflow s INavigator** - přepínání ViewModels v jednom okně  
+✅ **Dvě separátní databáze** - hlavní (DemoDb.db) + demo (DemoDb_Advanced.db)  
+✅ **Educational value** - vidíte oba přístupy vedle sebe  
+
+---
+
+## 📊 Shrnutí změn:
+
+| Co upravit | Soubor | Kolik řádků |
+|-----------|--------|-------------|
+| Přidat module | App.xaml.cs | +1 řádek |
+| Přidat init | App.xaml.cs | +15 řádků |
+| Změnit dependency | MainViewModel.cs | 2 řádky |
+| Přidat command | MainViewModel.cs | +7 řádků |
+| Přidat button | MainWindow.xaml | +5 řádků |
+| **CELKEM** | **3 soubory** | **~30 řádků** |
+
+---
+
+## ❓ Co dělat pokud:
+
+### **Build error: "DemoDbContext not found"**
+→ Ujistěte se, že máte všechny nové soubory (Models.Demo, Data)
+
+### **Runtime error: "AdvancedDemoMenuViewModel not registered"**
+→ Zkontrolujte že jste přidali `RegisterModule<AdvancedDemoModule>()`
+
+### **Window se neotevře**
+→ Check console logs pro detaily
+→ Ujistěte se, že ViewLocator podporuje Demo namespace (už je aktualizováno)
+
+### **Database error**
+→ Smažte `DemoDb_Advanced.db` a zkuste znovu
+
+---
+
+**Hotovo! Po těchto úpravách máte plně funkční Advanced Demo modul! 🎉**

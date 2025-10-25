@@ -1,0 +1,22 @@
+﻿<Application x:Class="WpfEngine.Demo.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:WpfEngine.Demo.Converters"
+             xmlns:local="clr-namespace:WpfEngine.Demo">
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- Value Converters -->
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+            <converters:StringToColorConverter x:Key="StepColorConverter"/>
+            <converters:NotNullToBoolConverter x:Key="NotNullToBoolConverter"/>
+            <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
+            <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
+            <!-- Global Styles -->
+            <Style TargetType="Window">
+                <Setter Property="FontFamily" Value="Segoe UI, Arial"/>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

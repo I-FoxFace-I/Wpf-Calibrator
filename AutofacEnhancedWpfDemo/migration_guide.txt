@@ -1,0 +1,331 @@
+# 🔄 Migration Guide
+
+## Jak přepsat stávající části aplikace na nový pattern
+
+Tento guide ukazuje jak **postupně** migrovat stávající aplikaci na nový pattern s INavigator a IWindowManager.
+
+---
+
+## 📋 Fáze migrace
+
+### **Fáze 1: Přidání IWindowManager do stávající aplikace**
+
+#### **1.1 Přidat IWindowManager do ServicesModule.cs**
+```csharp
+public class ServicesModule : Module
+{
+    protected override void Load(ContainerBuilder builder)
+    {
+        builder.RegisterType<ViewLocator>()
+               .As<IViewLocator>()
+               .SingleInstance();
+        
+        // PŘIDAT:
+        builder.RegisterType<WindowManager>()
+               .As<IWindowManager>()
+               .InstancePerLifetimeScope();
+        
+        // ... zbytek registrací
+    }
+}
+```
+
+#### **1.2 Změnit MainViewModel**
+```csharp
+// PŘED:
+public MainViewModel(INavigator navigator, ...)
+
+// PO:
+public MainViewModel(IWindowManager windowManager, ...)
+```
+
+#### **1.3 Změnit všechny ViewModels které otevírají okna**
+```csharp
+// PŘED:
+_navigator.ShowWindow<ProductsViewModel>();
+
+// PO:
+_windowManager.ShowWindow<ProductsViewModel>();
+
+// Dialog:
+// PŘED:
+var result = await _navigator.ShowDialogAsync<EditProductViewModel, EditProductResult>(...);
+
+// PO:
+var result = await _windowManager.ShowDialogAsync<EditProductViewModel, EditProductResult>(...);
+```
+
+---
+
+### **Fáze 2: Rozšíření stávajících modelů**
+
+#### **2.1 Rozšířit Customer model**
+```csharp
+public class Customer
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    
+    // PŘIDAT:
+    public string Phone { get; set; } = string.Empty;
+    public string CompanyName { get; set; } = string.Empty;
+    public string TaxId { get; set; } = string.Empty;
+    public CustomerType Type { get; set; } = CustomerType.Individual;
+    
+    public List<Address> Addresses { get; set; } = new(); // NOVÁ RELACE
+    public List<Order> Orders { get; set; } = new();
+}
+
+// PŘIDAT NOVÉ ENTITY:
+public class Address { /* viz DemoAddress.cs */ }
+public enum CustomerType { Individual, Business }
+```
+
+#### **2.2 Rozšířit Product model**
+```csharp
+public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    
+    // PŘIDAT:
+    public string Description { get; set; } = string.Empty;
+    public string Barcode { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public int Stock { get; set; }
+    public decimal Weight { get; set; }
+    public string Unit { get; set; } = "pcs";
+    
+    public int? CategoryId { get; set; } // NOVÁ RELACE
+    public ProductCategory? Category { get; set; }
+    
+    public List<OrderItem> OrderItems { get; set; } = new();
+}
+
+// PŘIDAT NOVOU ENTITU:
+public class ProductCategory { /* viz DemoProductCategory.cs */ }
+```
+
+#### **2.3 Aktualizovat AppDbContext**
+```csharp
+public class AppDbContext : DbContext
+{
+    public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    
+    // PŘIDAT:
+    public DbSet<Address> Addresses => Set<Address>();
+    public DbSet<ProductCategory> Categories => Set<ProductCategory>();
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        
+        // Existing relationships...
+        
+        // PŘIDAT:
+        modelBuilder.Entity<Customer>()
+            .HasMany(c => c.Addresses)
+            .WithOne(a => a.Customer)
+            .HasForeignKey(a => a.CustomerId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<ProductCategory>()
+            .HasMany(c => c.Products)
+            .WithOne(p => p.Category)
+            .HasForeignKey(p => p.CategoryId)
+            .OnDelete(DeleteBehavior.SetNull);
+    }
+}
+```
+
+#### **2.4 Migrace databáze**
+```bash
+# Smazat starou databázi
+rm DemoDb.db
+
+# Nebo vytvořit migraci
+dotnet ef migrations add AddAddressesAndCategories
+dotnet ef database update
+```
+
+---
+
+### **Fáze 3: Přidání Detail Views**
+
+#### **3.1 Vytvořit CustomerDetailViewModel**
+Použijte `DemoCustomerDetailViewModel.cs` jako šablonu:
+- Změňte namespace z `.Demo` na hlavní
+- Změňte `DemoCustomer` na `Customer`
+- Změňte `DemoAddress` na `Address`
+- Aktualizujte handlery na hlavní (ne Demo)
+
+#### **3.2 Vytvořit CustomerDetailWindow.xaml**
+Použijte `DemoCustomerDetailWindow.xaml` jako šablonu
+
+#### **3.3 Přidat ViewDetail command do CustomersViewModel**
+```csharp
+[RelayCommand(CanExecute = nameof(CanViewDetail))]
+private async Task ViewDetailAsync()
+{
+    if (SelectedCustomer == null) return;
+    
+    await _windowManager.ShowDialogAsync<CustomerDetailViewModel, bool>(
+        new CustomerDetailParams { CustomerId = SelectedCustomer.Id }
+    );
+    
+    await LoadCustomersAsync();
+}
+
+private bool CanViewDetail() => SelectedCustomer != null && !IsBusy;
+```
+
+#### **3.4 Přidat button do CustomersWindow.xaml**
+```xml
+<Button Content="👁️ View Detail" 
+        Command="{Binding ViewDetailCommand}"
+        ... />
+```
+
+#### **3.5 Opakovat pro Products**
+- ProductDetailViewModel
+- ProductDetailWindow
+- Přidat ViewDetail do ProductsViewModel
+
+---
+
+### **Fáze 4: Přepsat Workflow na INavigator**
+
+#### **4.1 Vytvořit WorkflowHostViewModel**
+```csharp
+public partial class WorkflowHostViewModel : BaseViewModel, IAsyncInitializable
+{
+    private readonly INavigator _navigator;
+    
+    public async Task InitializeAsync()
+    {
+        await _navigator.NavigateToAsync<WorkflowStep1ViewModel>();
+    }
+}
+```
+
+#### **4.2 Rozdělit OrderWorkflowViewModel na kroky**
+- WorkflowStep1ViewModel (Select Customer)
+- WorkflowStep2ViewModel (Add Products)
+- WorkflowStep3ViewModel (Review)
+
+Použijte `DemoWorkflowStep*.cs` jako šablony.
+
+#### **4.3 Vytvořit WorkflowHostWindow.xaml**
+```xml
+<local:ScopedWindow ...>
+    <ContentControl Content="{Binding}" />
+</local:ScopedWindow>
+```
+
+#### **4.4 Update code-behind**
+```csharp
+public partial class WorkflowHostWindow : ScopedWindow
+{
+    private async Task OnLoadedAsync()
+    {
+        if (DataContext is WorkflowHostViewModel vm)
+        {
+            var navigator = MyScope.Resolve<INavigator>() as Navigator;
+            navigator?.SetHostWindow(this);
+            
+            await vm.InitializeAsync();
+        }
+    }
+}
+```
+
+---
+
+## 📊 Postupnost migrace (doporučeno):
+
+1. ✅ **Fáze 1** - IWindowManager (1 den)
+   - Minimální změny
+   - Okamžitý benefit
+   - Stávající kód stále funguje
+
+2. ✅ **Fáze 2** - Rozšířené modely (2-3 dny)
+   - Přerušení služby kvůli DB migraci
+   - Backup databáze!
+   - Aktualizace handlerů
+
+3. ✅ **Fáze 3** - Detail Views (1-2 dny)
+   - Přidání hodnoty pro uživatele
+   - Žádné breaking changes
+
+4. ✅ **Fáze 4** - Workflow s INavigator (2-3 dny)
+   - Největší změna
+   - Čistší architektura
+   - Lepší testovatelnost
+
+---
+
+## ⚠️ Breaking Changes:
+
+### **Database Schema Changes**
+- Nové tabulky: `Addresses`, `ProductCategories`
+- Nové sloupce v `Customers`: Phone, CompanyName, TaxId, Type
+- Nové sloupce v `Products`: Description, Barcode, Weight, Unit, CategoryId
+
+**Řešení:**
+1. Backup databáze
+2. Smazat `DemoDb.db` a nechat vytvořit novou
+3. NEBO vytvořit EF Core migrace
+
+### **API Changes**
+- `INavigator` rozděleno na `INavigator` + `IWindowManager`
+- Všechny ViewModels používající `INavigator.ShowWindow()` musí změnit na `IWindowManager`
+
+---
+
+## 🎯 Konečný stav po migraci:
+
+```
+Application Structure:
+├── INavigator - ViewModel navigation (workflows)
+├── IWindowManager - Physical window management
+├── Extended Models - Customer, Product s plnými daty
+├── Detail Views - Zobrazení všech dat včetně relací
+├── CQRS Handlers - Pro rozšířené entity
+└── Workflow s Navigation - Čistší než CurrentStep pattern
+```
+
+---
+
+## 📝 Checklist pro každou fázi:
+
+### **Po Fázi 1:**
+- [ ] Build bez chyb
+- [ ] Všechna okna se otevírají
+- [ ] Dialogy fungují
+- [ ] Console logs ukazují správné service usage
+
+### **Po Fázi 2:**
+- [ ] Database migrace proběhla
+- [ ] Data jsou seedována
+- [ ] Všechny CRUD operace fungují
+- [ ] Relace jsou načítány správně
+
+### **Po Fázi 3:**
+- [ ] Detail views se otevírají
+- [ ] Všechna rozšířená data jsou viditelná
+- [ ] Edit v detail view funguje
+- [ ] Adresy/Kategorie jsou zobrazeny
+
+### **Po Fázi 4:**
+- [ ] Workflow naviguje mezi kroky
+- [ ] Back navigation funguje
+- [ ] Workflow state se předává
+- [ ] Order creation funguje
+
+---
+
+**💡 TIP:** Nemusíte migrovat všechno najednou! Advanced Demo modul ukazuje jak to má vypadat, můžete postupovat krok za krokem.

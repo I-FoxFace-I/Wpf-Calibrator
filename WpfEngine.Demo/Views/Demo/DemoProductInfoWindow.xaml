@@ -1,0 +1,206 @@
+﻿<local:ScopedWindow xmlns:local="clr-namespace:WpfEngine.Demo.Views"
+                    x:Class="WpfEngine.Demo.Views.DemoProductInfoWindow"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    Title="Product Information"
+                    Width="500" Height="600"
+                    WindowStartupLocation="CenterScreen"
+                    Background="#F8F9FA">
+
+    <Grid Margin="32">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" 
+                Background="#8B5CF6" 
+                CornerRadius="12" 
+                Padding="24"
+                Margin="0,0,0,24">
+            <StackPanel>
+                <TextBlock Text="📦 Product Information" 
+                           FontSize="24" 
+                           FontWeight="Bold" 
+                           Foreground="White"/>
+                <TextBlock Text="Detailed product specifications" 
+                           FontSize="14" 
+                           Foreground="#EDE9FE"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- Product Name -->
+                <Border Background="White" 
+                        CornerRadius="8" 
+                        Padding="20"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="{Binding Product.Name}" 
+                                   FontSize="22" 
+                                   FontWeight="Bold" 
+                                   Foreground="#1E293B"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding CategoryName}" 
+                                   FontSize="14" 
+                                   Foreground="#8B5CF6"
+                                   FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Price & Stock Status -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" 
+                            Background="White" 
+                            CornerRadius="8" 
+                            Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="Price" 
+                                       FontSize="12" 
+                                       Foreground="#64748B" 
+                                       Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding Product.Price, StringFormat=C}" 
+                                       FontSize="28" 
+                                       FontWeight="Bold" 
+                                       Foreground="#10B981"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" 
+                            Background="White" 
+                            CornerRadius="8" 
+                            Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="Availability" 
+                                       FontSize="12" 
+                                       Foreground="#64748B" 
+                                       Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding StockStatus}" 
+                                       FontSize="16" 
+                                       FontWeight="SemiBold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsInStock}" Value="True">
+                                                <Setter Property="Foreground" Value="#10B981"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsInStock}" Value="False">
+                                                <Setter Property="Foreground" Value="#EF4444"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Description -->
+                <Border Background="White" 
+                        CornerRadius="8" 
+                        Padding="20"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="Description" 
+                                   FontSize="14" 
+                                   FontWeight="SemiBold" 
+                                   Foreground="#1E293B"
+                                   Margin="0,0,0,12"/>
+                        <TextBlock Text="{Binding Product.Description}" 
+                                   FontSize="14" 
+                                   Foreground="#64748B"
+                                   TextWrapping="Wrap"
+                                   LineHeight="22"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Specifications -->
+                <Border Background="White" 
+                        CornerRadius="8" 
+                        Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="Specifications" 
+                                   FontSize="14" 
+                                   FontWeight="SemiBold" 
+                                   Foreground="#1E293B"
+                                   Margin="0,0,0,16"/>
+
+                        <!-- Barcode -->
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Barcode" 
+                                       FontSize="13" 
+                                       Foreground="#64748B"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Product.Barcode}" 
+                                       FontSize="13" 
+                                       Foreground="#1E293B"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <Border Height="1" Background="#E2E8F0" Margin="0,0,0,12"/>
+
+                        <!-- Weight -->
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Weight" 
+                                       FontSize="13" 
+                                       Foreground="#64748B"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock FontSize="13" 
+                                       Foreground="#1E293B"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center">
+                                <Run Text="{Binding Product.Weight, StringFormat=F2}"/>
+                                <Run Text="kg"/>
+                            </TextBlock>
+                        </Grid>
+
+                        <Border Height="1" Background="#E2E8F0" Margin="0,0,0,12"/>
+
+                        <!-- Unit -->
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Unit" 
+                                       FontSize="13" 
+                                       Foreground="#64748B"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Product.Unit}" 
+                                       FontSize="13" 
+                                       Foreground="#1E293B"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <Border Height="1" Background="#E2E8F0" Margin="0,0,0,12"/>
+
+                        <!-- Created Date -->
+                        <Grid>
+                            <TextBlock Text="Created" 
+                                       FontSize="13" 
+                                       Foreground="#64748B"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Product.CreatedAt, StringFormat=d}" 
+                                       FontSize="13" 
+                                       Foreground="#1E293B"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</local:ScopedWindow>
