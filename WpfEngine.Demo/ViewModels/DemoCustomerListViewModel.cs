@@ -49,7 +49,7 @@ public partial class DemoCustomerListViewModel : BaseViewModel, IDisposable
         Logger.LogInformation("[DEMO] CustomerListViewModel created with event subscription");
     }
 
-    public new async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
         await LoadCustomersAsync();
     }
@@ -100,17 +100,14 @@ public partial class DemoCustomerListViewModel : BaseViewModel, IDisposable
 
         Logger.LogInformation("[DEMO] Opening non-modal customer detail for {CustomerId}", customerId);
 
-        // Generate unique window ID
+        // Generate unique window params
         var itemParams = new DemoCustomerDetailParams { CustomerId = customerId };
         var windowId = itemParams.CorrelationId;
         
         _openDetailWindows[customerId] = windowId;
 
-        // Open non-modal child window
-        _windowService.OpenChildWindow<DemoCustomerDetailViewModel, DemoCustomerDetailParams>(
-            windowId,
-            itemParams
-        );
+        // Open as regular window (not child - ViewModel doesn't track window IDs)
+        _windowService.OpenWindow<DemoCustomerDetailViewModel, DemoCustomerDetailParams>(itemParams);
     }
 
     private bool CanViewDetail() => SelectedCustomer != null && !IsBusy;

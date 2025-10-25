@@ -1,17 +1,27 @@
 using System;
 using System.Windows;
-using Autofac;
 using WpfEngine.Core.ViewModels;
 using WpfEngine.Services.WindowTracking;
 
 namespace WpfEngine.Core.Services;
 
 /// <summary>
-/// Service for managing physical windows
-/// Supports sessions for sharing services across multiple windows
+/// Service for managing physical windows with hierarchical scope support
 /// </summary>
 public interface IWindowService
 {
+    // ========== SESSION MANAGEMENT ==========
+    
+    /// <summary>
+    /// Creates a new session scope for sharing services across multiple windows
+    /// </summary>
+    Guid CreateSession(string sessionName);
+    
+    /// <summary>
+    /// Closes session and all its windows
+    /// </summary>
+    void CloseSession(Guid sessionId);
+
     // ========== OPEN WINDOW ==========
 
     /// <summary>
@@ -23,6 +33,20 @@ public interface IWindowService
     /// Opens new window for ViewModel with options
     /// </summary>
     Guid OpenWindow<TViewModel, TOptions>(TOptions options)
+        where TViewModel : IViewModel
+        where TOptions : IVmParameters;
+
+    // ========== OPEN WINDOW IN SESSION ==========
+    
+    /// <summary>
+    /// Opens window within specific session scope
+    /// </summary>
+    Guid OpenWindowInSession<TViewModel>(Guid sessionId) where TViewModel : IViewModel;
+    
+    /// <summary>
+    /// Opens window within specific session scope with options
+    /// </summary>
+    Guid OpenWindowInSession<TViewModel, TOptions>(Guid sessionId, TOptions options)
         where TViewModel : IViewModel
         where TOptions : IVmParameters;
 
@@ -41,26 +65,6 @@ public interface IWindowService
     Guid OpenChildWindow<TViewModel, TOptions>(Guid parentWindowId, TOptions options)
         where TViewModel : IViewModel
         where TOptions : IVmParameters;
-
-    // ========== SESSION MANAGEMENT (NEW!) ==========
-
-    /// <summary>
-    /// Creates a new session scope for sharing services across multiple windows
-    /// Services registered as InstancePerMatchingLifetimeScope will be shared within session
-    /// </summary>
-    /// <param name="sessionTag">Optional tag for the session scope</param>
-    /// <returns>Session ID</returns>
-    Guid CreateSession(string? sessionTag = null);
-
-    /// <summary>
-    /// Gets session scope for direct service resolution
-    /// </summary>
-    ILifetimeScope? GetSessionScope(Guid sessionId);
-
-    /// <summary>
-    /// Closes session and all its windows
-    /// </summary>
-    void CloseSession(Guid sessionId);
 
     // ========== CLOSE WINDOW/DIALOG ==========
 
@@ -115,4 +119,3 @@ public interface IWindowService
     /// </summary>
     event EventHandler<WindowClosedEventArgs>? WindowClosed;
 }
-

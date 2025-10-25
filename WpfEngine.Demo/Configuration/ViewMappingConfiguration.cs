@@ -31,17 +31,24 @@ public class ViewMappingConfiguration : Core.Services.ViewMappingConfiguration
         registry.MapWindow<DemoProductDetailViewModel, DemoProductDetailWindow>();
         registry.MapWindow<DemoProductInfoViewModel, DemoProductInfoWindow>();
 
-        // ========== WORKFLOW ==========
-        // Workflow host window (shell)
+        // ========== WORKFLOW (Original) ==========
         registry.MapWindow<DemoWorkflowHostViewModel, DemoWorkflowHostWindow>();
-
-        // Workflow steps (UserControls)
         registry.MapControl<DemoWorkflowStep1ViewModel, DemoWorkflowStep1View>();
         registry.MapControl<DemoWorkflowStep2ViewModel, DemoWorkflowStep2View>();
         registry.MapControl<DemoWorkflowStep3ViewModel, DemoWorkflowStep3View>();
 
-         //========== ORDER MANAGEMENT(if exists) ==========
-         registry.MapWindow<DemoOrderListViewModel, DemoOrderListWindow>();
+        // ========== WORKFLOW (Refactored - Session Support) ==========
+        registry.MapWindow<DemoWorkflowHostViewModelRefactored, DemoWorkflowHostWindow>();
+        registry.MapControl<DemoWorkflowStep1ViewModelRefactored, DemoWorkflowStep1View>();
+        registry.MapControl<DemoWorkflowStep2ViewModelRefactored, DemoWorkflowStep2View>();
+        registry.MapControl<DemoWorkflowStep3ViewModelRefactored, DemoWorkflowStep3View>();
+
+        // ========== PRODUCT SELECTOR (for Workflow Session) ==========
+        registry.MapWindow<ProductSelectorViewModel, ProductSelectorWindow>();
+        registry.MapWindow<ProductDetailSelectorViewModel, ProductDetailSelectorWindow>();
+
+        // ========== ORDER MANAGEMENT ==========
+        registry.MapWindow<DemoOrderListViewModel, DemoOrderListWindow>();
         registry.MapWindow<DemoOrderDetailViewModel, DemoOrderDetailWindow>();
     }
 }

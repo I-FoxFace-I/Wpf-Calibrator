@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using Autofac;
-using Autofac.Core;
 using WpfEngine.Core.Services;
 using WpfEngine.Core.ViewModels;
 using Microsoft.Extensions.Logging;
@@ -12,25 +10,22 @@ namespace WpfEngine.Core.Services;
 
 /// <summary>
 /// Navigation service for ViewModel navigation within a window
-/// Resolves ViewModels from current scope (supports session scopes)
+/// DI-agnostic implementation - uses IViewModelFactory
 /// </summary>
 public class NavigationService : INavigationService
 {
-    private readonly ILifetimeScope _scope;
+    private readonly IViewModelFactory _viewModelFactory;
     private readonly ILogger<NavigationService> _logger;
     private readonly Stack<object> _navigationHistory = new();
 
     private object? _currentViewModel;
 
     public NavigationService(
-        ILifetimeScope scope,
+        IViewModelFactory viewModelFactory,
         ILogger<NavigationService> logger)
     {
-        _scope = scope;
+        _viewModelFactory = viewModelFactory;
         _logger = logger;
-        
-        _logger.LogDebug("[NAVIGATION] NavigationService created (Scope tag: {ScopeTag})", 
-            scope.Tag?.ToString() ?? "untagged");
     }
 
     // ========== EVENTS ==========
@@ -82,8 +77,8 @@ public class NavigationService : INavigationService
                 CurrentViewModel.GetType().Name, _navigationHistory.Count);
         }
 
-        // Create new ViewModel from current scope (supports session scopes!)
-        var viewModel = _scope.Resolve<TViewModel>();
+        // Create new ViewModel
+        var viewModel = _viewModelFactory.Create<TViewModel>();
 
         // Initialize if needed
         if (viewModel is IInitializable initializable)
@@ -94,7 +89,6 @@ public class NavigationService : INavigationService
 
         CurrentViewModel = viewModel;
         OnPropertyChanged(nameof(CanNavigateBack));
-        OnPropertyChanged(nameof(HistoryDepth));
     }
 
     public async Task NavigateToAsync<TViewModel, TOptions>(TOptions options)
@@ -112,8 +106,8 @@ public class NavigationService : INavigationService
                 CurrentViewModel.GetType().Name, _navigationHistory.Count);
         }
 
-        // Create new ViewModel with options from current scope
-        var viewModel = _scope.Resolve<TViewModel>(new TypedParameter(typeof(TOptions), options));
+        // Create new ViewModel with options
+        var viewModel = _viewModelFactory.Create<TViewModel, TOptions>(options);
 
         // Initialize with options (important for MSDI)
         if (viewModel is IInitializable<TOptions> initializable)

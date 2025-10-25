@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using WpfEngine.Core.Services;
+using WpfEngine.Services.WindowTracking;
 
 namespace WpfEngine.Demo.ViewModels;
 
@@ -59,7 +60,7 @@ public partial class DemoCustomerDetailViewModel : BaseViewModel
         Logger.LogInformation("[DEMO] CustomerDetailViewModel created for customer {CustomerId}", _customerId);
     }
 
-    public new async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
         try
         {
@@ -117,8 +118,8 @@ public partial class DemoCustomerDetailViewModel : BaseViewModel
 
             Logger.LogInformation("[DEMO] Customer {CustomerId} updated successfully", _customerId);
 
-            // Close window via WindowService (passes this ViewModel instance)
-            _windowService.CloseWindow<DemoCustomerDetailViewModel>(Id);
+            // Close window via WindowService using VmKey
+            _windowService.Close(this.GetVmKey());
         }
         catch (Exception ex)
         {
@@ -140,8 +141,8 @@ public partial class DemoCustomerDetailViewModel : BaseViewModel
     {
         Logger.LogInformation("[DEMO] Customer {CustomerId} edit cancelled", _customerId);
 
-        // Close window without saving
-        _windowService.CloseWindow<DemoCustomerDetailViewModel>(this.Id);
+        // Close window without saving using VmKey
+        _windowService.Close(this.GetVmKey());
     }
 
     partial void OnNameChanged(string value) => SaveCommand.NotifyCanExecuteChanged();

@@ -73,7 +73,7 @@ public partial class DemoOrderDetailViewModel : BaseViewModel, IInitializable
         Logger.LogInformation("DemoOrderDetailViewModel created for order {OrderId}", _orderId);
     }
     
-    public override async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
         await LoadOrderAsync();
     }

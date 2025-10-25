@@ -9,16 +9,14 @@ using WpfEngine.Services.WindowTracking;
 namespace WpfEngine.Demo.ViewModels;
 
 /// <summary>
-/// Workflow Host ViewModel - Shell pattern with Session support
-/// Creates a workflow session where all windows share common services
+/// Workflow Host ViewModel - Shell pattern
 /// Exposes Navigator's CurrentViewModel for content binding
 /// Handles window close requests from Navigator
 /// </summary>
 public partial class DemoWorkflowHostViewModel : BaseViewModel, IInitializable, IDisposable
 {
     private readonly INavigationService _navigator;
-    private readonly IWorkflowSessionFactory _sessionFactory;
-    private IWorkflowSession? _session;
+    private readonly IWindowService _windowService;
     private bool _disposed;
 
     /// <summary>
@@ -26,18 +24,13 @@ public partial class DemoWorkflowHostViewModel : BaseViewModel, IInitializable, 
     /// </summary>
     public object? CurrentContent => _navigator.CurrentViewModel;
 
-    /// <summary>
-    /// Current workflow session
-    /// </summary>
-    public IWorkflowSession? Session => _session;
-
     public DemoWorkflowHostViewModel(
         INavigationService navigator,
-        IWorkflowSessionFactory sessionFactory,
+        IWindowService WindowService,
         ILogger<DemoWorkflowHostViewModel> logger) : base(logger)
     {
         _navigator = navigator;
-        _sessionFactory = sessionFactory;
+        _windowService = WindowService;
 
         // Subscribe to Navigator's PropertyChanged
         _navigator.PropertyChanged += (s, e) =>
@@ -56,19 +49,13 @@ public partial class DemoWorkflowHostViewModel : BaseViewModel, IInitializable, 
         Logger.LogInformation("[WORKFLOW] Host ViewModel created");
     }
 
-    public override async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
-        // Create workflow session - all windows opened from this session will share services
-        _session = _sessionFactory.CreateSession("order-creation-workflow");
-        
-        Logger.LogInformation("[WORKFLOW] Session created: {SessionId}", _session.SessionId);
-        
-        // Navigate to first step
         Logger.LogInformation("[WORKFLOW] Starting workflow - navigating to Step 1");
         await _navigator.NavigateToAsync<DemoWorkflowStep1ViewModel>();
     }
 
-    private void OnWindowCloseRequested(object? sender, WindowCloseRequestedEventArgs e)
+    private async void OnWindowCloseRequested(object? sender, WindowCloseRequestedEventArgs e)
     {
         Logger.LogInformation("[WORKFLOW] Window close requested (confirmation: {ShowConfirmation})",
             e.ShowConfirmation);
@@ -89,36 +76,40 @@ public partial class DemoWorkflowHostViewModel : BaseViewModel, IInitializable, 
             }
         }
 
-        Logger.LogInformation("[WORKFLOW] Closing workflow and session");
+        Logger.LogInformation("[WORKFLOW] Closing workflow window via WindowService");
 
-        // Close session (closes all session windows)
-        _session?.Close();
-        
-        // Find and close this window
-        foreach (Window window in System.Windows.Application.Current.Windows)
-        {
-            if (window.DataContext == this)
-            {
-                window.Close();
-                break;
-            }
-        }
+        // Close this window via WindowService
+        // WindowService tracks windows by (Guid, Type), but for this use case
+        // we can use a simpler approach - get the window from the scope
+        //await Task.Run(() =>
+        //{
+        //    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        //    {
+        //        // Find the window by ViewModel DataContext
+        //        foreach (Window window in System.Windows.Application.Current.Windows)
+        //        {
+        //            if (window.DataContext == this)
+        //            {
+        //                window.Close();
+        //                break;
+        //            }
+        //        }
+        //    });
+        //});
+        _windowService.Close(this.GetVmKey());
     }
 
     public void Dispose()
     {
         if (_disposed) return;
 
-        Logger.LogInformation("[WORKFLOW] Host ViewModel disposing - closing session");
+        Logger.LogInformation("[WORKFLOW] Host ViewModel disposed");
 
         // Unsubscribe from events
         _navigator.WindowCloseRequested -= OnWindowCloseRequested;
 
         // Clear navigation history
         _navigator.ClearHistory();
-
-        // Close and dispose session
-        _session?.Dispose();
 
         _disposed = true;
     }

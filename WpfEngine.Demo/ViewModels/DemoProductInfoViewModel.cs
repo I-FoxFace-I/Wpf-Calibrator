@@ -39,7 +39,7 @@ public partial class DemoProductInfoViewModel : BaseViewModel, IInitializable
         Logger.LogInformation("DemoProductInfoViewModel created for product {ProductId}", _productId);
     }
     
-    public override async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
         await LoadProductAsync();
     }

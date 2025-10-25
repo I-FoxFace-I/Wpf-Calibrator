@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using WpfEngine.Core.Services;
+using WpfEngine.Services.WindowTracking;
 
 namespace WpfEngine.Demo.ViewModels;
 
@@ -16,7 +17,7 @@ public partial class DemoProductDetailViewModel : BaseViewModel
     private readonly IQueryHandler<GetDemoProductByIdQuery, DemoProduct?> _getProductHandler;
     private readonly IQueryHandler<GetAllDemoCategoriesQuery, List<DemoProductCategory>> _getCategoriesHandler;
     private readonly ICommandHandler<UpdateDemoProductCommand> _updateHandler;
-    private readonly IDialogService _dialogService;
+    private readonly IWindowService _windowService;
     private readonly int _productId;
     
     [ObservableProperty]
@@ -53,18 +54,18 @@ public partial class DemoProductDetailViewModel : BaseViewModel
         IQueryHandler<GetDemoProductByIdQuery, DemoProduct?> getProductHandler,
         IQueryHandler<GetAllDemoCategoriesQuery, List<DemoProductCategory>> getCategoriesHandler,
         ICommandHandler<UpdateDemoProductCommand> updateHandler,
-        IDialogService WindowService,
+        IWindowService windowService,
         ILogger<DemoProductDetailViewModel> logger,
         DemoProductDetailParams parameters) : base(logger)
     {
         _getProductHandler = getProductHandler;
         _getCategoriesHandler = getCategoriesHandler;
         _updateHandler = updateHandler;
-        _dialogService = WindowService;
+        _windowService = windowService;
         _productId = parameters.ProductId;
     }
     
-    public new async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
         try
         {
@@ -115,11 +116,15 @@ public partial class DemoProductDetailViewModel : BaseViewModel
                 _productId, Name, Description, Barcode, Price, Stock, Weight, Unit, SelectedCategory?.Id
             ));
 
-            await _getProductHandler.HandleAsync(new GetDemoProductByIdQuery(_productId));
+            Logger.LogInformation("[DEMO] Product {ProductId} updated successfully", _productId);
+
+            // Close window via WindowService using VmKey
+            _windowService.Close(this.GetVmKey());
         }
         catch (Exception ex)
         {
             SetError($"Failed to save: {ex.Message}");
+            Logger.LogError(ex, "[DEMO] Error saving product {ProductId}", _productId);
         }
         finally
         {
@@ -132,7 +137,10 @@ public partial class DemoProductDetailViewModel : BaseViewModel
     [RelayCommand]
     private void Cancel()
     {
-        return;
+        Logger.LogInformation("[DEMO] Product {ProductId} edit cancelled", _productId);
+
+        // Close window without saving using VmKey
+        _windowService.Close(this.GetVmKey());
     }
     
     partial void OnNameChanged(string value) => SaveCommand.NotifyCanExecuteChanged();

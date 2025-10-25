@@ -22,6 +22,8 @@ public abstract partial class BaseViewModel : WpfEngine.Core.ViewModels.BaseView
     {
     }
 
+    public Guid Id { get; }
+
     /// <summary>
     /// Clears error message
     /// </summary>

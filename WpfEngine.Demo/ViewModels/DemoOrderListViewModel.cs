@@ -40,7 +40,7 @@ public partial class DemoOrderListViewModel : BaseViewModel, IInitializable
         Logger.LogInformation("DemoOrderListViewModel created");
     }
     
-    public override async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
         await LoadOrdersAsync();
     }
@@ -84,8 +84,8 @@ public partial class DemoOrderListViewModel : BaseViewModel, IInitializable
         
         Logger.LogInformation("Opening order detail for order {OrderId}", order.Id);
         
-        _windowService.OpenChildWindow<DemoOrderDetailViewModel, DemoOrderDetailParams>(
-            Id,
+        // Open as regular window (ViewModel.Id is not window ID in non-session context)
+        _windowService.OpenWindow<DemoOrderDetailViewModel, DemoOrderDetailParams>(
             new DemoOrderDetailParams { OrderId = order.Id }
         );
     }

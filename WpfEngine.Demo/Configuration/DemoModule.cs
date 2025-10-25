@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using WpfEngine.Services;
 using WpfEngine.Services.Autofac;
+using WpfEngine.Demo.Services;
 
 namespace WpfEngine.Demo.Configuration;
 
@@ -38,20 +39,26 @@ public class DemoModule : Autofac.Module
         .As<IDbContextFactory<DemoDbContext>>()
         .SingleInstance();
 
-        // ========== WORKFLOW STATE ==========
-        // Shared state for workflow steps within a session
-        // Uses InstancePerMatchingLifetimeScope to share across windows in same session
+        // ========== WORKFLOW SESSION SERVICES ==========
+        
+        // IOrderBuilderService - shared across ALL windows in workflow session
+        // Uses InstancePerMatchingLifetimeScope to match WorkflowSession tags
+        builder.RegisterType<OrderBuilderService>()
+               .As<IOrderBuilderService>()
+               .InstancePerMatchingLifetimeScope((ILifetimeScope scope, Autofac.Core.IComponentRegistration request) =>
+               {
+                   var tag = scope.Tag?.ToString() ?? "";
+                   return tag.StartsWith("WorkflowSession:");
+               });
+
+        // WorkflowState - also shared in workflow session
         builder.RegisterType<WorkflowState>()
                .AsSelf()
-               .InstancePerMatchingLifetimeScope("workflow-session-*");
-
-        // ========== SHARED WORKFLOW SERVICES ==========
-        // Services shared within window scope (or session scope if window opened from session)
-        // For workflow steps in same window: all steps share same instance (window scope)
-        // For multi-window workflows: use session scope (see SESSION_PATTERN_GUIDE.md)
-        builder.RegisterType<WpfEngine.Demo.Services.OrderBuilderService>()
-               .As<WpfEngine.Demo.Services.IOrderBuilderService>()
-               .InstancePerLifetimeScope(); // Shared per window (or per session if in session)
+               .InstancePerMatchingLifetimeScope((ILifetimeScope scope, Autofac.Core.IComponentRegistration request) =>
+               {
+                   var tag = scope.Tag?.ToString() ?? "";
+                   return tag.StartsWith("WorkflowSession:");
+               });
 
         // ========== DEMO CQRS HANDLERS ==========
 
@@ -72,6 +79,17 @@ public class DemoModule : Autofac.Module
                                                     i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>)))
                .AsClosedTypesOf(typeof(IQueryHandler<,>))
                .InstancePerDependency();
+
+        // ========== WORKFLOW SESSION FACTORY ==========
+        
+        // Factory for creating workflow sessions
+        builder.Register<Func<Guid, string, IWorkflowSession>>((c, p) =>
+        {
+            var windowService = c.Resolve<IWindowService>();
+            var logger = c.Resolve<ILogger<WorkflowSession>>();
+            
+            return (sessionId, sessionName) => new WorkflowSession(sessionId, sessionName, windowService, logger);
+        });
 
         // ========== DEMO VIEWMODELS ==========
         // Register as InstancePerDependency (transient) for proper parameterization
@@ -103,20 +121,7 @@ public class DemoModule : Autofac.Module
                .AsSelf()
                .InstancePerDependency();
 
-        builder.RegisterType<DemoProductInfoViewModel>()
-               .AsSelf()
-               .InstancePerDependency();
-
-        // Order management
-        builder.RegisterType<DemoOrderListViewModel>()
-               .AsSelf()
-               .InstancePerDependency();
-
-        builder.RegisterType<DemoOrderDetailViewModel>()
-               .AsSelf()
-               .InstancePerDependency();
-
-        // Workflow
+        // Workflow (Original - keep for backwards compatibility)
         builder.RegisterType<DemoWorkflowHostViewModel>()
                .AsSelf()
                .InstancePerDependency();
@@ -127,10 +132,39 @@ public class DemoModule : Autofac.Module
 
         builder.RegisterType<DemoWorkflowStep2ViewModel>()
                .AsSelf()
-               .PropertiesAutowired() // Enable property injection for Session
                .InstancePerDependency();
 
         builder.RegisterType<DemoWorkflowStep3ViewModel>()
+               .AsSelf()
+               .InstancePerDependency();
+
+        // Workflow (REFACTORED - New approach)
+        builder.RegisterType<DemoWorkflowHostViewModelRefactored>()
+               .AsSelf()
+               .InstancePerDependency();
+
+        builder.RegisterType<DemoWorkflowStep1ViewModelRefactored>()
+               .AsSelf()
+               .InstancePerDependency();
+
+        builder.RegisterType<DemoWorkflowStep2ViewModelRefactored>()
+               .AsSelf()
+               .InstancePerDependency();
+
+        builder.RegisterType<DemoWorkflowStep3ViewModelRefactored>()
+               .AsSelf()
+               .InstancePerDependency();
+
+        // Product selector (for workflow)
+        builder.RegisterType<ProductSelectorViewModel>()
+               .AsSelf()
+               .InstancePerDependency();
+
+        builder.RegisterType<ProductDetailSelectorViewModel>()
+               .AsSelf()
+               .InstancePerDependency();
+
+        builder.RegisterType<DemoProductInfoViewModel>()
                .AsSelf()
                .InstancePerDependency();
 
@@ -160,19 +194,6 @@ public class DemoModule : Autofac.Module
                .AsSelf()
                .InstancePerDependency();
 
-        builder.RegisterType<DemoProductInfoWindow>()
-               .AsSelf()
-               .InstancePerDependency();
-
-        // Order management
-        builder.RegisterType<DemoOrderListWindow>()
-               .AsSelf()
-               .InstancePerDependency();
-
-        builder.RegisterType<DemoOrderDetailWindow>()
-               .AsSelf()
-               .InstancePerDependency();
-
         // Workflow
         builder.RegisterType<DemoWorkflowHostWindow>()
                .AsSelf()
@@ -191,5 +212,26 @@ public class DemoModule : Autofac.Module
                .AsSelf()
                .InstancePerDependency();
 
+        // Product selector windows (for workflow)
+        builder.RegisterType<ProductSelectorWindow>()
+               .AsSelf()
+               .InstancePerDependency();
+
+        builder.RegisterType<ProductDetailSelectorWindow>()
+               .AsSelf()
+               .InstancePerDependency();
+
+        builder.RegisterType<DemoProductInfoWindow>()
+               .AsSelf()
+               .InstancePerDependency();
+
+        // Order management windows
+        builder.RegisterType<DemoOrderListWindow>()
+               .AsSelf()
+               .InstancePerDependency();
+
+        builder.RegisterType<DemoOrderDetailWindow>()
+               .AsSelf()
+               .InstancePerDependency();
     }
 }

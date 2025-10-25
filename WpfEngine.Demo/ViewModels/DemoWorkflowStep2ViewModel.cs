@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using WpfEngine.Demo.Application;
 using WpfEngine.Demo.Application.Products;
 using WpfEngine.Demo.Models;
-using WpfEngine.Demo.Services;
 using WpfEngine.Core.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,17 +16,13 @@ namespace WpfEngine.Demo.ViewModels;
 
 /// <summary>
 /// Step 2: Add products to order
-/// Uses shared IOrderBuilderService from session scope
 /// </summary>
 public partial class DemoWorkflowStep2ViewModel : BaseStepViewModel, IInitializable, IDisposable
 {
     private readonly IQueryHandler<GetAllDemoProductsQuery, List<DemoProduct>> _getAllProductsHandler;
     private readonly INavigationService _navigator;
-    private readonly IOrderBuilderService _orderBuilder; // Shared session service!
+    private readonly IWindowService _windowService;
     private readonly WorkflowState _state;
-    
-    // Property injection for optional IWorkflowSession
-    public IWorkflowSession? Session { get; set; }
 
     [ObservableProperty]
     private string _customerName = string.Empty;
@@ -48,20 +43,20 @@ public partial class DemoWorkflowStep2ViewModel : BaseStepViewModel, IInitializa
     public DemoWorkflowStep2ViewModel(
         IQueryHandler<GetAllDemoProductsQuery, List<DemoProduct>> getAllProductsHandler,
         INavigationService navigator,
-        IOrderBuilderService orderBuilder,  // Injected from session scope!
+        IWindowService WindowService,
         ILogger<DemoWorkflowStep2ViewModel> logger,
         WorkflowState state) : base(logger)
     {
         _getAllProductsHandler = getAllProductsHandler;
         _navigator = navigator;
-        _orderBuilder = orderBuilder;
+        _windowService = WindowService;
         _state = state;
         CustomerName = state.CustomerName;
 
-        Logger.LogInformation("[WORKFLOW] Step2 ViewModel created with shared OrderBuilder service");
+        Logger.LogInformation("[WORKFLOW] Step2 ViewModel created");
     }
 
-    public override async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
         try
         {
@@ -74,15 +69,16 @@ public partial class DemoWorkflowStep2ViewModel : BaseStepViewModel, IInitializa
                 Products.Add(product);
             }
 
-            // Load order items from shared service
-            OrderItems.Clear();
-            foreach (var item in _orderBuilder.OrderItems)
+            if (_state.OrderItems != null)
             {
-                OrderItems.Add(item);
+                OrderItems.Clear();
+                foreach (var item in _state.OrderItems)
+                {
+                    OrderItems.Add(item);
+                }
             }
 
-            Logger.LogInformation("[WORKFLOW] Step2 loaded {Count} products, {OrderCount} order items from shared service", 
-                Products.Count, OrderItems.Count);
+            Logger.LogInformation("[WORKFLOW] Step2 loaded {Count} products", Products.Count);
         }
         finally
         {
@@ -97,18 +93,10 @@ public partial class DemoWorkflowStep2ViewModel : BaseStepViewModel, IInitializa
 
         Logger.LogInformation("[WORKFLOW] Opening product info for {ProductId}", product.Id);
 
-        // Open product info window in session (if session available)
-        if (Session != null)
-        {
-            Session.OpenWindow<DemoProductInfoViewModel, DemoProductInfoParams>(
-                new DemoProductInfoParams { ProductId = product.Id });
-                
-            Logger.LogInformation("[WORKFLOW] Opened ProductInfo in session {SessionId}", Session.SessionId);
-        }
-        else
-        {
-            Logger.LogWarning("[WORKFLOW] Cannot open product info - no session available (not injected)");
-        }
+        // Open as regular window (not child) - original approach doesn't track window IDs
+        _windowService.OpenWindow<DemoProductInfoViewModel, DemoProductInfoParams>(
+            new DemoProductInfoParams { ProductId = product.Id }
+        );
     }
 
     [RelayCommand]
@@ -116,17 +104,24 @@ public partial class DemoWorkflowStep2ViewModel : BaseStepViewModel, IInitializa
     {
         if (product == null || Quantity <= 0) return;
 
-        // Add to shared order builder service
-        _orderBuilder.AddItem(product.Id, product.Name, product.Price, Quantity);
+        var existingItem = OrderItems.FirstOrDefault(i => i.ProductId == product.Id);
 
-        Logger.LogInformation("[WORKFLOW] Added {Quantity}x {Product} to shared order", Quantity, product.Name);
-
-        // Reload items from shared service
-        OrderItems.Clear();
-        foreach (var item in _orderBuilder.OrderItems)
+        if (existingItem != null)
         {
-            OrderItems.Add(item);
+            existingItem.Quantity += Quantity;
         }
+        else
+        {
+            OrderItems.Add(new WorkflowOrderItem
+            {
+                ProductId = product.Id,
+                ProductName = product.Name,
+                UnitPrice = product.Price,
+                Quantity = Quantity
+            });
+        }
+
+        Logger.LogInformation("[WORKFLOW] Added {Quantity}x {Product} to order", Quantity, product.Name);
 
         OnOrderTotalChanged();
     }
@@ -136,40 +131,35 @@ public partial class DemoWorkflowStep2ViewModel : BaseStepViewModel, IInitializa
     {
         if (item == null) return;
 
-        _orderBuilder.RemoveItem(item);
-        
-        Logger.LogInformation("[WORKFLOW] Removed {Product} from shared order", item.ProductName);
-        
-        // Reload items from shared service
-        OrderItems.Clear();
-        foreach (var orderItem in _orderBuilder.OrderItems)
+        if (OrderItems.Remove(item))
         {
-            OrderItems.Add(orderItem);
+            Logger.LogInformation("[WORKFLOW] Removed {Product} from order", item.ProductName);
+            OnOrderItemsChanged(OrderItems);
+            OnOrderTotalChanged();
         }
-        
-        OnOrderTotalChanged();
     }
 
     [RelayCommand]
     private async Task BackAsync()
     {
         Logger.LogInformation("[WORKFLOW] Going back to Step 1");
-        
-        // No need to save to state - data is in shared service!
+
+        _state.OrderItems = OrderItems.ToList();
+
         await _navigator.NavigateBackAsync();
     }
 
     [RelayCommand(CanExecute = nameof(CanGoNext))]
     private async Task NextAsync()
     {
-        Logger.LogInformation("[WORKFLOW] Moving to Step 3 - Review (Order has {Count} items)", 
-            _orderBuilder.OrderItems.Count);
+        Logger.LogInformation("[WORKFLOW] Moving to Step 3 - Review");
 
-        // No need to pass items - Step3 will get them from shared service!
+        _state.OrderItems = OrderItems.ToList();
+
         await _navigator.NavigateToAsync<DemoWorkflowStep3ViewModel, WorkflowState>(_state);
     }
 
-    private bool CanGoNext() => _orderBuilder.OrderItems.Any();
+    private bool CanGoNext() => OrderItems.Any();
 
     partial void OnOrderItemsChanged(ObservableCollection<WorkflowOrderItem> value)
     {
@@ -182,13 +172,16 @@ public partial class DemoWorkflowStep2ViewModel : BaseStepViewModel, IInitializa
         NextCommand.NotifyCanExecuteChanged();
     }
 
-    public new void Dispose()
+
+    public void Dispose()
     {
         if (_disposed) return;
 
         Logger.LogInformation("[WORKFLOW] Step2 ViewModel disposed");
 
-        // No need to close child windows - session handles that
+        // NOTE: CloseAllChildWindows needs window ID, not ViewModel ID
+        // In non-session context, we don't track this properly
+        // Windows will close when their parent scope disposes anyway
 
         _disposed = true;
     }

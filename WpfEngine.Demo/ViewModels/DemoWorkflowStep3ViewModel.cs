@@ -5,7 +5,6 @@ using WpfEngine.Demo.Application;
 using WpfEngine.Demo.Application.Addresses;
 using WpfEngine.Demo.Application.Orders;
 using WpfEngine.Demo.Models;
-using WpfEngine.Demo.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -16,12 +15,10 @@ namespace WpfEngine.Demo.ViewModels;
 
 /// <summary>
 /// Step 3: Review order and select/create shipping address
-/// Uses shared IOrderBuilderService from session scope
 /// </summary>
 public partial class DemoWorkflowStep3ViewModel : BaseViewModel, IInitializable
 {
     private readonly INavigationService _navigator;
-    private readonly IOrderBuilderService _orderBuilder; // Shared session service!
     private readonly WorkflowState _state;
     private readonly IQueryHandler<GetShippingAddressesQuery, List<DemoAddress>> _getShippingAddressesHandler;
     private readonly ICommandHandler<CreateAddressCommand> _createAddressHandler;
@@ -60,7 +57,6 @@ public partial class DemoWorkflowStep3ViewModel : BaseViewModel, IInitializable
 
     public DemoWorkflowStep3ViewModel(
         INavigationService navigator,
-        IOrderBuilderService orderBuilder,  // Injected from session scope!
         ILogger<DemoWorkflowStep3ViewModel> logger,
         WorkflowState state,
         IQueryHandler<GetShippingAddressesQuery, List<DemoAddress>> getShippingAddressesHandler,
@@ -68,7 +64,6 @@ public partial class DemoWorkflowStep3ViewModel : BaseViewModel, IInitializable
         ICommandHandler<CreateDemoOrderCommand> createOrderHandler) : base(logger)
     {
         _navigator = navigator;
-        _orderBuilder = orderBuilder;
         _state = state;
         _getShippingAddressesHandler = getShippingAddressesHandler;
         _createAddressHandler = createAddressHandler;
@@ -76,17 +71,18 @@ public partial class DemoWorkflowStep3ViewModel : BaseViewModel, IInitializable
 
         CustomerName = state.CustomerName;
 
-        // Load items from shared service instead of state
-        foreach (var item in _orderBuilder.OrderItems)
+        if (state.OrderItems != null)
         {
-            OrderItems.Add(item);
+            foreach (var item in state.OrderItems)
+            {
+                OrderItems.Add(item);
+            }
         }
 
-        Logger.LogInformation("[WORKFLOW] Step3 ViewModel created - reviewing order with {ItemCount} items from shared service",
-            OrderItems.Count);
+        Logger.LogInformation("[WORKFLOW] Step3 ViewModel created - reviewing order");
     }
 
-    public override async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
         await LoadShippingAddressesAsync();
     }
@@ -97,10 +93,8 @@ public partial class DemoWorkflowStep3ViewModel : BaseViewModel, IInitializable
         {
             IsBusy = true;
 
-            var customerId = _orderBuilder.CustomerId ?? _state.CustomerId;
-
             var addresses = await _getShippingAddressesHandler.HandleAsync(
-                new GetShippingAddressesQuery(customerId)
+                new GetShippingAddressesQuery(_state.CustomerId)
             );
 
             ShippingAddresses.Clear();
@@ -114,8 +108,7 @@ public partial class DemoWorkflowStep3ViewModel : BaseViewModel, IInitializable
                 SelectedShippingAddress = ShippingAddresses.First();
             }
 
-            Logger.LogInformation("[WORKFLOW] Loaded {Count} shipping addresses for customer {CustomerId}", 
-                addresses.Count, customerId);
+            Logger.LogInformation("[WORKFLOW] Loaded {Count} shipping addresses", addresses.Count);
         }
         finally
         {
@@ -165,7 +158,7 @@ public partial class DemoWorkflowStep3ViewModel : BaseViewModel, IInitializable
                 }
 
                 await _createAddressHandler.HandleAsync(new CreateAddressCommand(
-                    _orderBuilder.CustomerId ?? _state.CustomerId,
+                    _state.CustomerId,
                     NewStreet,
                     NewCity,
                     NewZipCode,
@@ -183,11 +176,7 @@ public partial class DemoWorkflowStep3ViewModel : BaseViewModel, IInitializable
                 shippingAddressId = SelectedShippingAddress.Id;
             }
 
-            // Save shipping address to shared service
-            _orderBuilder.ShippingAddressId = shippingAddressId;
-
-            // Get items from shared service
-            var orderItems = _orderBuilder.OrderItems.Select(i => new DemoOrderItem
+            var orderItems = OrderItems.Select(i => new DemoOrderItem
             {
                 ProductId = i.ProductId,
                 Quantity = i.Quantity,
@@ -195,16 +184,13 @@ public partial class DemoWorkflowStep3ViewModel : BaseViewModel, IInitializable
             }).ToList();
 
             await _createOrderHandler.HandleAsync(new CreateDemoOrderCommand(
-                _orderBuilder.CustomerId ?? _state.CustomerId,
+                _state.CustomerId,
                 shippingAddressId,
                 orderItems
             ));
 
             Logger.LogInformation("[WORKFLOW] ✅ Order created successfully! {ItemCount} items, Total: {Total:C}",
-                orderItems.Count, Total);
-
-            // Clear shared service for next workflow
-            _orderBuilder.Clear();
+                OrderItems.Count, Total);
 
             _navigator.RequestWindowClose();
 

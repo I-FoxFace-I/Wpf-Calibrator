@@ -1,7 +1,8 @@
 using System.Linq;
 using Autofac;
+using AutofacEnhancedWpfDemo.Services.Autofac;
 using WpfEngine.Core.Services;
-using WpfEngine.Core.Services.Autofac;
+using WpfEngine.Services;
 using WpfEngine.Services.Autofac;
 
 namespace WpfEngine.Configuration;
@@ -22,13 +23,13 @@ public class CoreServicesModule : Module
 
         // ========== VIEW LOCATOR (InstancePerLifetimeScope) ==========
         // ViewLocator needs scope to resolve views
-        builder.RegisterType<Services.ViewLocatorService>()
+        builder.RegisterType<ViewLocatorService>()
                .As<IViewLocatorService>()
                .InstancePerLifetimeScope();
 
         // ========== VIEWMODEL FACTORY (InstancePerLifetimeScope) ==========
         // Factory uses current scope to create ViewModels
-        builder.RegisterType<Services.Autofac.ViewModelFactory>()
+        builder.RegisterType<ViewModelFactory>()
                .As<IViewModelFactory>()
                .InstancePerLifetimeScope();
 
@@ -38,22 +39,27 @@ public class CoreServicesModule : Module
                .As<INavigationService>()
                .InstancePerLifetimeScope();
 
+        // ========== CONTENT MANAGER (InstancePerMatchingLifetimeScope - Window scopes) ==========
+        // Each window has its own content manager for shell content navigation
+        builder.RegisterType<WpfEngine.Core.Services.Autofac.ContentManager>()
+               .As<IContentManager>()
+               .InstancePerMatchingLifetimeScope((ILifetimeScope scope, Autofac.Core.IComponentRegistration request) =>
+               {
+                   var tag = scope.Tag?.ToString() ?? "";
+                   return tag.StartsWith("Window:");
+               });
+
         // ========== WINDOW SERVICE (InstancePerLifetimeScope) ==========
         // Each scope manages its own windows
-        builder.RegisterType<WpfEngine.Core.Services.Autofac.WindowService>()
+        // Using WindowServiceRefactored for session support
+        builder.RegisterType<WpfEngine.Core.Services.Autofac.WindowServiceRefactored>()
                .As<IWindowService>()
                .InstancePerLifetimeScope();
 
         // ========== DIALOG SERVICE (InstancePerLifetimeScope) ==========
         // Dialog service per scope
-        builder.RegisterType<Services.Autofac.DialogService>()
+        builder.RegisterType<DialogService>()
                .As<IDialogService>()
                .InstancePerLifetimeScope();
-
-        // ========== WORKFLOW SESSION FACTORY (Singleton) ==========
-        // Factory for creating workflow sessions
-        builder.RegisterType<WpfEngine.Core.Services.Autofac.WorkflowSessionFactory>()
-               .As<IWorkflowSessionFactory>()
-               .SingleInstance();
     }
 }

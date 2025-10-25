@@ -8,18 +8,19 @@
 		<UseWPF>true</UseWPF>
 	</PropertyGroup>
 	<ItemGroup>
-		<Compile Remove="Core\Scopes\**" />
 		<Compile Remove="Core\Services\MicrosoftDI\**" />
 		<Compile Remove="obj\**" />
-		<EmbeddedResource Remove="Core\Scopes\**" />
 		<EmbeddedResource Remove="Core\Services\MicrosoftDI\**" />
 		<EmbeddedResource Remove="obj\**" />
-		<None Remove="Core\Scopes\**" />
 		<None Remove="Core\Services\MicrosoftDI\**" />
 		<None Remove="obj\**" />
-		<Page Remove="Core\Scopes\**" />
 		<Page Remove="Core\Services\MicrosoftDI\**" />
 		<Page Remove="obj\**" />
+		
+		<!-- Exclude old MS DI scope files, keep only ScopeTagDefinitions -->
+		<Compile Remove="Core\Scopes\scoped_window_msdi.cs" />
+		<Compile Remove="Core\Scopes\window_service_msdi_scoped.cs" />
+		<Compile Remove="Core\Scopes\scope_*.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
