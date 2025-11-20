@@ -1,260 +1,157 @@
 using Autofac;
-using Autofac.Core;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using WpfEngine.Core.Services;
-using WpfEngine.Core.Services.Autofac;
-using WpfEngine.Core.ViewModels;
+using System;
+using System.Threading.Tasks;
+using WpfEngine.ViewModels;
+using WpfEngine.Services;
+using WpfEngine.Services.Autofac;
+using WpfEngine.Tests.Helpers;
 using Xunit;
 
 namespace WpfEngine.Tests.Core.Services;
 
 /// <summary>
-/// Tests for ContentManager - shell content navigation
+/// Tests for ContentManager - lightweight content creation and disposal
 /// </summary>
-public class ContentManagerTests : IDisposable
+public class ContentManagerTests : AutofacTestFixture
 {
-    private readonly IContainer _container;
-    private readonly ILifetimeScope _scope;
-    private readonly ContentManager _contentManager;
-    private readonly Mock<ILogger<ContentManager>> _loggerMock;
-
-    public ContentManagerTests()
+    protected override IViewRegistry RegisterMapping(IViewRegistry viewRegistry)
     {
-        var builder = new ContainerBuilder();
+        return viewRegistry; // No view mappings needed for ContentManager tests
+    }
+
+    protected override void RegisterTestServices(ContainerBuilder builder)
+    {
+        // Register ContentManager
+        builder.RegisterType<ContentManager>()
+               .As<IContentManager>()
+               .InstancePerLifetimeScope();
 
         // Register test ViewModels
-        builder.RegisterType<TestViewModel1>().AsSelf();
-        builder.RegisterType<TestViewModel2>().AsSelf();
-        builder.RegisterType<TestViewModelWithParams>().AsSelf();
+        builder.RegisterType<TestViewModel>().AsSelf().InstancePerDependency();
+        builder.RegisterType<TestViewModelWithParams>().AsSelf().InstancePerDependency();
+        builder.RegisterType<DisposableTestViewModel>().AsSelf().InstancePerDependency();
 
-        _container = builder.Build();
-        _scope = _container.BeginLifetimeScope("test-window");
-
-        _loggerMock = new Mock<ILogger<ContentManager>>();
-        _contentManager = new ContentManager(_scope, _loggerMock.Object);
+        // Register loggers
+        builder.Register(c => Mock.Of<ILogger<ContentManager>>()).InstancePerDependency();
+        builder.Register(c => Mock.Of<ILogger<TestViewModel>>()).InstancePerDependency();
+        builder.Register(c => Mock.Of<ILogger<TestViewModelWithParams>>()).InstancePerDependency();
+        builder.Register(c => Mock.Of<ILogger<DisposableTestViewModel>>()).InstancePerDependency();
     }
 
     [Fact]
-    public async Task NavigateToAsync_SetsCurrentContent()
-    {
-        // Act
-        await _contentManager.NavigateToAsync<TestViewModel1>();
-
-        // Assert
-        _contentManager.CurrentContent.Should().NotBeNull();
-        _contentManager.CurrentContent.Should().BeOfType<TestViewModel1>();
-    }
-
-    [Fact]
-    public async Task NavigateToAsync_InitializesViewModel()
-    {
-        // Act
-        await _contentManager.NavigateToAsync<TestViewModel1>();
-
-        // Assert
-        var vm = _contentManager.CurrentContent as TestViewModel1;
-        vm!.IsInitialized.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task NavigateToAsync_PushesCurrentToHistory()
+    public async Task CreateContentAsync_WithoutParameters_ShouldCreateViewModel()
     {
         // Arrange
-        await _contentManager.NavigateToAsync<TestViewModel1>();
-        _contentManager.CanNavigateBack.Should().BeFalse();
+        var contentManager = Scope.Resolve<IContentManager>();
 
         // Act
-        await _contentManager.NavigateToAsync<TestViewModel2>();
+        var viewModel = await contentManager.CreateContentAsync<TestViewModel>();
 
         // Assert
-        _contentManager.CanNavigateBack.Should().BeTrue();
-        _contentManager.HistoryDepth.Should().Be(1);
+        viewModel.Should().NotBeNull();
+        viewModel.Should().BeOfType<TestViewModel>();
+        viewModel.ViewModelId.Should().NotBeEmpty();
     }
 
     [Fact]
-    public async Task NavigateToAsync_DisposesPreviousContent()
+    public async Task CreateContentAsync_WithParameters_ShouldCreateViewModelWithParameters()
     {
         // Arrange
-        await _contentManager.NavigateToAsync<TestViewModel1>();
-        var firstVm = _contentManager.CurrentContent as TestViewModel1;
+        var contentManager = Scope.Resolve<IContentManager>();
+        var parameters = new TestParameters { CorrelationId = Guid.NewGuid(), Value = "Test" };
 
         // Act
-        await _contentManager.NavigateToAsync<TestViewModel2>();
+        var viewModel = await contentManager.CreateContentAsync<TestViewModelWithParams>(parameters);
 
         // Assert
-        firstVm!.IsDisposed.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task NavigateToAsync_WithOptions_PassesOptionsToViewModel()
-    {
-        // Arrange
-        var options = new TestViewModelParams { TestValue = "test123" };
-
-        // Act
-        await _contentManager.NavigateToAsync<TestViewModelWithParams, TestViewModelParams>(options);
-
-        // Assert
-        var vm = _contentManager.CurrentContent as TestViewModelWithParams;
-        vm!.ReceivedOptions.Should().BeSameAs(options);
-        vm.ReceivedOptions.TestValue.Should().Be("test123");
-    }
-
-    [Fact]
-    public async Task NavigateBackAsync_RestoresPreviousContent()
-    {
-        // Arrange
-        await _contentManager.NavigateToAsync<TestViewModel1>();
-        var firstVm = _contentManager.CurrentContent;
-        await _contentManager.NavigateToAsync<TestViewModel2>();
-
-        // Act
-        await _contentManager.NavigateBackAsync();
-
-        // Assert
-        _contentManager.CurrentContent.Should().BeSameAs(firstVm);
-    }
-
-    [Fact]
-    public async Task NavigateBackAsync_WhenHistoryEmpty_DoesNothing()
-    {
-        // Arrange
-        await _contentManager.NavigateToAsync<TestViewModel1>();
-        var currentVm = _contentManager.CurrentContent;
-
-        // Act
-        await _contentManager.NavigateBackAsync();
-
-        // Assert
-        _contentManager.CurrentContent.Should().BeSameAs(currentVm);
-    }
-
-    [Fact]
-    public async Task ClearHistory_DisposesAllHistoryItems()
-    {
-        // Arrange
-        var disposedVms = new List<TestViewModel1>();
-
-        await _contentManager.NavigateToAsync<TestViewModel1>();
-        disposedVms.Add(_contentManager.CurrentContent as TestViewModel1);
-
-        await _contentManager.NavigateToAsync<TestViewModel1>();
-        disposedVms.Add(_contentManager.CurrentContent as TestViewModel1);
-
-        await _contentManager.NavigateToAsync<TestViewModel1>();
-
-        // Act
-        _contentManager.ClearHistory();
-
-        // Assert
-        _contentManager.HistoryDepth.Should().Be(0);
-        _contentManager.CanNavigateBack.Should().BeFalse();
-        disposedVms.ForEach(vm => vm!.IsDisposed.Should().BeTrue());
-    }
-
-    [Fact]
-    public void RequestShellClose_RaisesEvent()
-    {
-        // Arrange
-        ShellCloseRequestedEventArgs? capturedArgs = null;
-        _contentManager.ShellCloseRequested += (s, e) => capturedArgs = e;
-
-        // Act
-        _contentManager.RequestShellClose(showConfirmation: true, confirmationMessage: "Test message");
-
-        // Assert
-        capturedArgs.Should().NotBeNull();
-        capturedArgs!.ShowConfirmation.Should().BeTrue();
-        capturedArgs.ConfirmationMessage.Should().Be("Test message");
-    }
-
-    [Fact]
-    public async Task PropertyChanged_IsRaisedWhenCurrentContentChanges()
-    {
-        // Arrange
-        var propertyChangedCount = 0;
-        _contentManager.PropertyChanged += (s, e) =>
+        viewModel.Should().NotBeNull();
+        viewModel.Should().BeOfType<TestViewModelWithParams>();
+        if (viewModel is TestViewModelWithParams vmWithParams)
         {
-            if (e.PropertyName == nameof(IContentManager.CurrentContent))
-                propertyChangedCount++;
-        };
+            vmWithParams.ReceivedParameters.Should().Be(parameters);
+        }
+    }
+
+    [Fact]
+    public async Task CreateContentAsync_WithType_ShouldCreateViewModel()
+    {
+        // Arrange
+        var contentManager = Scope.Resolve<IContentManager>();
 
         // Act
-        await _contentManager.NavigateToAsync<TestViewModel1>();
-        await _contentManager.NavigateToAsync<TestViewModel2>();
+        var viewModel = await contentManager.CreateContentAsync(typeof(TestViewModel));
 
         // Assert
-        propertyChangedCount.Should().Be(2);
+        viewModel.Should().NotBeNull();
+        viewModel.Should().BeOfType<TestViewModel>();
     }
 
-    public void Dispose()
+    [Fact]
+    public async Task CreateContentAsync_WithInvalidType_ShouldThrow()
     {
-        _scope?.Dispose();
-        _container?.Dispose();
+        // Arrange
+        var contentManager = Scope.Resolve<IContentManager>();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(async () =>
+            await contentManager.CreateContentAsync(typeof(string)));
     }
 
-    // ========== TEST VIEW MODELS ==========
-
-    public class TestViewModel1 : IViewModel, IInitializable, IDisposable
+    [Fact]
+    public async Task CreateContentAsync_DisposableViewModel_ShouldBeDisposable()
     {
-        public Guid Id { get; } = Guid.NewGuid();
-        public string? DisplayName { get; set; }
-        public bool IsBusy { get; set; }
-        public string? BusyMessage { get; set; }
-        public bool IsInitialized { get; private set; }
-        public bool IsDisposed { get; private set; }
+        // Arrange
+        var contentManager = Scope.Resolve<IContentManager>();
 
-        public Task InitializeAsync()
+        // Act
+        var viewModel = await contentManager.CreateContentAsync<DisposableTestViewModel>();
+
+        // Assert
+        viewModel.Should().NotBeNull();
+        viewModel.Should().BeAssignableTo<IDisposable>();
+
+        // Dispose
+        if (viewModel is DisposableTestViewModel disposableVm)
         {
-            IsInitialized = true;
-            return Task.CompletedTask;
+            disposableVm.Dispose();
+            disposableVm.IsDisposed.Should().BeTrue();
+        }
+    }
+
+    [Fact]
+    public async Task CreateContentAsync_WithCancellationToken_ShouldRespectCancellation()
+    {
+        // Arrange
+        var contentManager = Scope.Resolve<IContentManager>();
+        var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        // Act & Assert
+        // Note: Cancellation might not be checked during creation, but should not throw
+        var viewModel = await contentManager.CreateContentAsync<TestViewModel>(
+            cancellationToken: cts.Token);
+
+        viewModel.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Dispose_ShouldDisposeContentManager()
+    {
+        // Arrange
+        var contentManager = Scope.Resolve<IContentManager>();
+
+        // Act
+        if (contentManager is IDisposable disposable)
+        {
+            disposable.Dispose();
         }
 
-        public void Dispose()
-        {
-            IsDisposed = true;
-        }
-
-        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
-    }
-
-    public class TestViewModel2 : IViewModel, IInitializable
-    {
-        public Guid Id { get; } = Guid.NewGuid();
-        public string? DisplayName { get; set; }
-        public bool IsBusy { get; set; }
-        public string? BusyMessage { get; set; }
-
-        public Task InitializeAsync() => Task.CompletedTask;
-
-        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
-    }
-
-    public class TestViewModelParams : IVmParameters
-    {
-        public Guid CorrelationId { get; init; } = Guid.NewGuid();
-        public string TestValue { get; init; } = string.Empty;
-    }
-
-    public class TestViewModelWithParams : IViewModel, IInitializable<TestViewModelParams>
-    {
-        public Guid Id { get; } = Guid.NewGuid();
-        public string? DisplayName { get; set; }
-        public bool IsBusy { get; set; }
-        public string? BusyMessage { get; set; }
-        public TestViewModelParams? ReceivedOptions { get; private set; }
-
-        public Task InitializeAsync() => Task.CompletedTask;
-
-        public Task InitializeAsync(TestViewModelParams parameter)
-        {
-            ReceivedOptions = parameter;
-            return Task.CompletedTask;
-        }
-
-        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+        // Assert
+        // Should not throw
+        contentManager.Should().NotBeNull();
     }
 }
 

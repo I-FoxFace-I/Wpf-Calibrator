@@ -1,10 +1,11 @@
 using Autofac;
 using Microsoft.Extensions.Logging;
 using Moq;
-using WpfEngine.Core.Services;
-using WpfEngine.Core.Services.Autofac;
+using WpfEngine.ViewModels;
+using WpfEngine.Tests.Core.Services;
 using WpfEngine.Services;
 using WpfEngine.Services.Autofac;
+
 
 namespace WpfEngine.Tests.Helpers;
 
@@ -14,13 +15,25 @@ namespace WpfEngine.Tests.Helpers;
 /// </summary>
 public abstract class AutofacTestFixture : IDisposable
 {
-    protected IContainer Container { get; private set; }
-    protected ILifetimeScope Scope { get; private set; }
+    private readonly IContainer _container;
+    private readonly ILifetimeScope _scope;
+    private readonly IViewRegistry _viewRegistry;
+    private readonly IWindowManager _windowManager;
+    private readonly IWindowTracker _windowTracker;
+    protected IContainer Container => _container;
+    protected ILifetimeScope Scope => _scope;
+    protected IViewRegistry ViewRegistry => _viewRegistry;
+    protected IWindowTracker WindowTracker => _windowTracker;
+    protected IWindowManager WindowManager => _windowManager;
 
     protected AutofacTestFixture()
     {
-        Container = BuildContainer();
-        Scope = Container.BeginLifetimeScope();
+        _container = BuildContainer();
+        _viewRegistry = BuildViewRegistery();
+        _scope = _container.BeginLifetimeScope("root");
+        _windowTracker = _scope.Resolve<IWindowTracker>();
+        _windowManager = _scope.Resolve<IWindowManager>();
+        
     }
 
     /// <summary>
@@ -47,33 +60,113 @@ public abstract class AutofacTestFixture : IDisposable
     {
         // ViewRegistry
         builder.RegisterType<ViewRegistry>()
-               .AsSelf()
                .As<IViewRegistry>()
                .SingleInstance();
 
-        // ViewLocator
-        builder.RegisterType<ViewLocatorService>()
-               .As<IViewLocatorService>()
+        // WindowManager - virtual method to allow custom implementations
+        RegisterWindowManager(builder);
+
+        builder.RegisterType<WindowContext>()
+               .As<IWindowContext>()
                .InstancePerLifetimeScope();
 
-        // ViewModelFactory
-        builder.RegisterType<ViewModelFactory>()
-               .As<IViewModelFactory>()
-               .InstancePerLifetimeScope();
+        builder.RegisterType<WindowTracker>()
+                   .As<IWindowTracker>()
+                   .SingleInstance();
+
+        // ISessionManager removed - use IScopeManager instead
 
         // ContentManager - per window scope
+        builder.RegisterType<Navigator>()
+               .As<INavigator>()
+               .InstancePerLifetimeScope();
         builder.RegisterType<ContentManager>()
                .As<IContentManager>()
-               .InstancePerMatchingLifetimeScope((ILifetimeScope scope, Autofac.Core.IComponentRegistration request) =>
-               {
-                   var tag = scope.Tag?.ToString() ?? "";
-                   return tag.StartsWith("Window:");
-               });
+               .InstancePerLifetimeScope();
 
-        // Register generic ILogger<T> - returns mocked logger for any type
+        builder.RegisterType<DialogHost>()
+               .As<IDialogHost>()
+               .InstancePerLifetimeScope();
+
+        // Generic loggers
+        builder.Register(c => Mock.Of<ILogger>()).InstancePerDependency();
+        builder.Register(c => Mock.Of<ILogger<ContentManager>>()).InstancePerDependency();
+        builder.Register(c => Mock.Of<ILogger<DialogHost>>()).InstancePerDependency();
+        builder.Register(c => Mock.Of<ILogger<ViewRegistry>>()).InstancePerDependency();
+        builder.Register(c => Mock.Of<ILogger<Navigator>>()).InstancePerDependency();
+        builder.Register(c => Mock.Of<ILogger<WindowContext>>()).InstancePerDependency();
+        builder.Register(c => Mock.Of<ILogger<ScopedWindowManager>>()).SingleInstance();
+        builder.Register(c => Mock.Of<ILogger<WindowTracker>>()).SingleInstance();
+        builder.Register(_ => Mock.Of<ILogger<WindowTracker>>()).InstancePerDependency();
+        builder.Register(_ => Mock.Of<ILogger<ScopedWindowManager>>()).InstancePerDependency();
+        
+        // Loggers for new scope system
+        builder.Register(_ => Mock.Of<ILogger<ScopedWindowManager>>()).SingleInstance();
+        builder.Register(_ => Mock.Of<ILogger<ScopeManager>>()).SingleInstance();
+        builder.Register(_ => Mock.Of<ILogger<ScopeSession>>()).InstancePerDependency();
+
+        //.InstancePerMatchingLifetimeScope((ILifetimeScope scope, Autofac.Core.IComponentRegistration request) =>
+        //{
+        //    var tag = scope.Tag?.ToString() ?? "";
+        //    return tag.StartsWith("Window:");
+        //});
+
+        builder.Register(c => Mock.Of<ILogger>()).InstancePerDependency();
+
+        //Register generic ILogger<T> - returns mocked logger for any type
         builder.RegisterGeneric(typeof(Mock<>)).InstancePerDependency();
         builder.RegisterGeneric(typeof(MockLogger<>))
                .As(typeof(ILogger<>))
+               .SingleInstance();
+    }
+
+    protected virtual IViewRegistry BuildViewRegistery()
+    {
+
+        if(!_container.TryResolve<IViewRegistry>(out var instance))
+        {
+            throw new InvalidOperationException("Cant resolve IViewRegistry");
+        }
+        else if(instance is null)
+        {
+            throw new ArgumentNullException("Resolve IViewRegistry is null");
+        }
+
+        return RegisterMapping(instance);
+
+    }
+
+    protected abstract IViewRegistry RegisterMapping(IViewRegistry viewRegistry);
+
+    /// <summary>
+    /// Register WindowManager implementation
+    /// Override to use different WindowManager implementation (e.g., ScopedWindowManager)
+    /// </summary>
+    protected virtual void RegisterWindowManager(ContainerBuilder builder)
+    {
+        RegisterScopedWindowManager(builder);
+        // Default: ScopedWindowManager with IScopeManager (replaces legacy WindowManager)
+    }
+
+    /// <summary>
+    /// Override to use ScopedWindowManager instead of WindowManager
+    /// </summary>
+    protected void RegisterScopedWindowManager(ContainerBuilder builder)
+    {
+        // Register new IScopeManager
+        builder.RegisterType<ScopeManager>()
+               .As<IScopeManager>()
+               .SingleInstance();
+        
+        // Register loggers for new components
+        builder.Register(c => Mock.Of<ILogger<ScopedWindowManager>>()).SingleInstance();
+        builder.Register(c => Mock.Of<ILogger<ScopeManager>>()).SingleInstance();
+        builder.Register(c => Mock.Of<ILogger<ScopeSession>>()).InstancePerDependency();
+        
+        // Register ScopedWindowManager instead of WindowManager
+        builder.RegisterType<ScopedWindowManager>()
+               .As<IScopedWindowManager>()
+               .As<IWindowManager>()
                .SingleInstance();
     }
 
@@ -81,10 +174,9 @@ public abstract class AutofacTestFixture : IDisposable
     /// Register test-specific services
     /// Override in derived classes to add test ViewModels, Views, etc.
     /// </summary>
-    protected virtual void RegisterTestServices(ContainerBuilder builder)
-    {
-        // Override in derived classes
-    }
+    protected abstract void RegisterTestServices(ContainerBuilder builder);
+
+    
 
     /// <summary>
     /// Creates a scoped lifetime for testing
@@ -104,8 +196,8 @@ public abstract class AutofacTestFixture : IDisposable
 
     public virtual void Dispose()
     {
-        Scope?.Dispose();
-        Container?.Dispose();
+        _scope.Dispose();
+        _container.Dispose();
     }
 }
 

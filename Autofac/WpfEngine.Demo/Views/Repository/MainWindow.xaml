@@ -1,0 +1,177 @@
+<windows:ScopedWindow  xmlns:windows="clr-namespace:WpfEngine.Views.Windows;assembly=WpfEngine"
+                       x:Class="WpfEngine.Demo.Views.Repository.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="WpfEngine Demo V2 - Repository + Unit of Work"
+        Width="1200" Height="800"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">
+    <windows:ScopedWindow.Resources>
+        <Style x:Key="MenuButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2196F3"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="BorderBrush" Value="#2196F3"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </windows:ScopedWindow.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Menu/Command Bar -->
+            <RowDefinition Height="*"/>     <!-- Content Area -->
+            <RowDefinition Height="Auto"/> <!-- Status Bar -->
+        </Grid.RowDefinitions>
+
+        <!-- Menu/Command Bar (top) -->
+        <Border Grid.Row="0" 
+                Background="#2C3E50" 
+                Padding="15,10"
+                BorderBrush="#34495E"
+                BorderThickness="0,0,0,2">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="WpfEngine Demo - Repository Pattern" 
+                          FontSize="18" 
+                          FontWeight="Bold"
+                          Foreground="White"
+                          VerticalAlignment="Center"
+                          Margin="0,0,30,0"/>
+                
+                <Button Content="⭐ CQRS Demo" 
+                       Command="{Binding OpenAdvancedDemoCommand}"
+                       Style="{StaticResource MenuButtonStyle}"
+                       Background="#9B59B6"
+                       Foreground="White"/>
+                
+                <Button Content="👥 Customers" 
+                       Command="{Binding OpenCustomersCommand}"
+                       Style="{StaticResource MenuButtonStyle}"/>
+                
+                <Button Content="📦 Products" 
+                       Command="{Binding OpenProductsCommand}"
+                       Style="{StaticResource MenuButtonStyle}"/>
+                
+                <Button Content="📋 Orders" 
+                       Command="{Binding OpenOrdersCommand}"
+                       Style="{StaticResource MenuButtonStyle}"/>
+                
+                <Button Content="🛒 Workflow" 
+                       Command="{Binding OpenWorkflowCommand}"
+                       Style="{StaticResource MenuButtonStyle}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Content Area (center) -->
+        <Grid Grid.Row="1" Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/> <!-- Session Status Panel (left sidebar) -->
+                <ColumnDefinition Width="*"/>   <!-- Main Content (center) -->
+                <ColumnDefinition Width="250"/> <!-- Window List Panel (right sidebar) -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Session Status Panel (left sidebar) -->
+            <Border Grid.Column="0" 
+                   Background="White" 
+                   BorderBrush="#E0E0E0" 
+                   BorderThickness="1"
+                   Margin="0,0,5,0"
+                   Padding="10">
+                <StackPanel>
+                    <TextBlock Text="📊 Active Sessions" 
+                              FontWeight="Bold" 
+                              FontSize="14"
+                              Margin="0,0,0,10"/>
+                    <TextBlock Text="No active sessions" 
+                              FontSize="12" 
+                              Foreground="#757575"
+                              TextWrapping="Wrap"/>
+                    <!-- TODO: SessionStatusPanel will be added here -->
+                </StackPanel>
+            </Border>
+
+            <!-- Main Content (center) -->
+            <Border Grid.Column="1" 
+                   Background="White" 
+                   BorderBrush="#E0E0E0" 
+                   BorderThickness="1"
+                   Margin="0,0,5,0"
+                   Padding="20">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="🚀 WpfEngine Demo V2" 
+                              FontSize="32" 
+                              FontWeight="Bold"
+                              HorizontalAlignment="Center"
+                              Margin="0,0,0,15"/>
+                    <TextBlock Text="Repository + Unit of Work Pattern" 
+                              FontSize="18" 
+                              Foreground="#757575"
+                              HorizontalAlignment="Center"
+                              Margin="0,0,0,30"/>
+                    <TextBlock Text="Select an option from the menu to get started" 
+                              FontSize="14" 
+                              Foreground="#9E9E9E"
+                              HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Window List Panel (right sidebar) -->
+            <Border Grid.Column="2" 
+                   Background="White" 
+                   BorderBrush="#E0E0E0" 
+                   BorderThickness="1"
+                   Padding="10">
+                <StackPanel>
+                    <TextBlock Text="🪟 Open Windows" 
+                              FontWeight="Bold" 
+                              FontSize="14"
+                              Margin="0,0,0,10"/>
+                    <TextBlock Text="No windows open" 
+                              FontSize="12" 
+                              Foreground="#757575"
+                              TextWrapping="Wrap"/>
+                    <!-- TODO: WindowListPanel will be added here -->
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Status Bar (bottom) -->
+        <Border Grid.Row="2" 
+               Background="#34495E" 
+               Padding="10,5"
+               BorderBrush="#2C3E50"
+               BorderThickness="0,2,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0"
+                          Text="{Binding StatusMessage}"
+                          Foreground="#ECF0F1"
+                          FontSize="12"
+                          VerticalAlignment="Center"/>
+                
+                <TextBlock Grid.Column="1"
+                          Text="Ready"
+                          Foreground="#95A5A6"
+                          FontSize="11"
+                          VerticalAlignment="Center"
+                          Margin="10,0,0,0"/>
+            </Grid>
+        </Border>
+    </Grid>
+</windows:ScopedWindow>
+
